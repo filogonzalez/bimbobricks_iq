@@ -53,7 +53,7 @@ targets:
       forms_catalog: bimbobricks_forms_dev
       app_name: bimbobricks-iq-dev
       db_project_id: bimbobricks-iq-dev
-      app_users_group: admins           # en dev solo la ven los admins
+      # app_users_group: el valor por defecto (users) → la ve todo el workspace, igual que prod
 
   prod:
     workspace:

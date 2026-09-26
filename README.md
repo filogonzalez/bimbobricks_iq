@@ -34,7 +34,7 @@ POST /api/register, /api/newsletter ──► Lakebase  forms.registrations / fo
    ```bash
    databricks auth login --host https://adb-1844781131568521.1.azuredatabricks.net --profile bimbo
    ```
-3. Despliega en **dev** (solo lo ven los admins):
+3. Despliega en **dev** (la ven todos los usuarios del workspace, grupo `users`):
    ```bash
    ./deploy.sh dev -p bimbo
    ```

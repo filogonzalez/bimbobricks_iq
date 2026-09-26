@@ -4,12 +4,20 @@ resources:
       name: ${var.app_name}
       description: BimboBricks IQ · Ola 2 — web del programa de formación (registro + newsletter + noticias)
       source_code_path: ../app
+      # Autorización en nombre del usuario (OBO): el proxy reenvía a la App el token del usuario
+      # (X-Forwarded-Access-Token) limitado a estos scopes. La App solo lo usa para confirmar quién
+      # envía cada formulario (GET /Me, scope iam.current-user:read, que Databricks añade siempre y no
+      # admite declarar). La lista no puede ir vacía, así que se pide el scope de solo lectura más
+      # pequeño. La primera vez que alguien abre la web, Databricks le pide consentimiento.
+      user_api_scopes:
+        - catalog.catalogs:read
       resources:
-        # Inyecta PGHOST/PGPORT/PGDATABASE/PGUSER/PGSSLMODE; el SP de la App obtiene CONNECT + CREATE.
+        # Inyecta PGHOST/PGPORT/PGDATABASE/PGUSER/PGSSLMODE; app.yaml lo expone como LAKEBASE_ENDPOINT.
+        # El SP de la App obtiene su rol de Postgres con CONNECT + CREATE en la base.
         - name: forms-db
-          database:
-            instance_name: ${resources.database_instances.forms_db.name}
-            database_name: ${resources.database_catalogs.forms_catalog.database_name}
+          postgres:
+            branch: ${resources.postgres_projects.forms_db.name}/branches/production
+            database: ${resources.postgres_projects.forms_db.name}/branches/production/databases/databricks-postgres
             permission: CAN_CONNECT_AND_CREATE
         # app.yaml lo expone como MEDIA_VOLUME
         - name: media-volume

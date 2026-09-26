@@ -15,7 +15,11 @@ CREATE TABLE IF NOT EXISTS forms.registrations (
   self_assessment_done  boolean,
   ui_language           text,
   source                text,
-  sso_email             text,          -- identidad SSO que reporta Databricks Apps (X-Forwarded-Email)
+  -- Quién envió el formulario según Databricks Apps (nunca el campo email del formulario):
+  sso_email             text,          -- X-Forwarded-Email, o el userName confirmado con el token OBO
+  sso_user              text,          -- X-Forwarded-User
+  sso_username          text,          -- X-Forwarded-Preferred-Username
+  sso_verified          boolean NOT NULL DEFAULT false,  -- identidad confirmada con el token del usuario (/Me)
   client_submitted_at   timestamptz,
   submissions           integer NOT NULL DEFAULT 1,
   created_at            timestamptz NOT NULL DEFAULT now(),
@@ -29,6 +33,9 @@ CREATE TABLE IF NOT EXISTS forms.newsletter_subscriptions (
   lang             text,
   source           text,
   sso_email        text,
+  sso_user         text,
+  sso_username     text,
+  sso_verified     boolean NOT NULL DEFAULT false,
   client_ts        timestamptz,
   created_at       timestamptz NOT NULL DEFAULT now(),
   updated_at       timestamptz NOT NULL DEFAULT now(),

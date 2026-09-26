@@ -3,6 +3,9 @@ env:
   # Recurso `media-volume` de la App (resources/app.yml) → "catalogo.esquema.volumen"
   - name: MEDIA_VOLUME
     valueFrom: media-volume
+  # Recurso `forms-db` (Lakebase) → projects/<proyecto>/branches/<rama>/endpoints/<cómputo>
+  - name: LAKEBASE_ENDPOINT
+    valueFrom: forms-db
   - name: ALLOWED_DOMAINS
     value: "grupobimbo.com,gbsupport.net"
   - name: NEWS_TTL_SECONDS

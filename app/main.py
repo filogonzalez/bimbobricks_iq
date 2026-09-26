@@ -4,7 +4,8 @@ GET  /                 HTML preparado por scripts/prepare.py + bloque de noticia
 GET  /media/video.mp4  vídeo desde el Volume, con soporte Range
 POST /api/register     registro  → Lakebase forms.registrations
 POST /api/newsletter   newsletter → Lakebase forms.newsletter_subscriptions
-GET  /healthz          estado (build, almacén)
+GET  /api/me           identidad con la que se guardan los envíos (cabeceras del proxy + token OBO)
+GET  /api/health       estado (build, almacén); /healthz lo responde el proxy de Databricks Apps
 """
 import gzip
 import hashlib
@@ -18,6 +19,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 
+import identity
 from models import Newsletter, Registration
 from store import make_store, to_json
 from volume import CachedFile, VolumeReader
@@ -67,8 +69,17 @@ BUILD = json.loads((STATIC / "build.json").read_text(encoding="utf-8")) if (STAT
 app = FastAPI(title="BimboBricks IQ", docs_url=None, redoc_url=None, openapi_url=None)
 
 
-def _sso_email(request: Request):
-    return (request.headers.get("x-forwarded-email") or "").strip().lower() or None
+def _submitter(request: Request):
+    """Identidad de quien envía el formulario, o None si no se puede atribuir el envío."""
+    who = identity.from_headers(request.headers)
+    # En Databricks Apps el proxy identifica siempre al usuario: sin identidad, no se guarda nada.
+    if not who.email and os.getenv("DATABRICKS_APP_NAME"):
+        return None
+    return who
+
+
+def _unauthenticated():
+    return JSONResponse({"ok": False, "error": "unauthenticated"}, status_code=401)
 
 
 @app.exception_handler(RequestValidationError)
@@ -124,21 +135,33 @@ def _save(fn, row):
 
 @app.post("/api/register")
 def register(reg: Registration, request: Request):
-    row = reg.model_dump()
-    row["raw"] = to_json(reg.model_dump(by_alias=True))
-    row["sso_email"] = _sso_email(request)
+    who = _submitter(request)
+    if who is None:
+        return _unauthenticated()
+    # Las columnas de identidad van al final: un campo extra del formulario no puede pisarlas.
+    row = {**reg.model_dump(), "raw": to_json(reg.model_dump(by_alias=True)), **who.columns()}
     body, status = _save(store.upsert_registration, row)
     return JSONResponse(body, status_code=status)
 
 
 @app.post("/api/newsletter")
 def newsletter(sub: Newsletter, request: Request):
-    row = sub.model_dump(include={"email", "lang", "source", "ts"})
-    row["sso_email"] = _sso_email(request)
+    who = _submitter(request)
+    if who is None:
+        return _unauthenticated()
+    row = {**sub.model_dump(include={"email", "lang", "source", "ts"}), **who.columns()}
     body, status = _save(store.upsert_newsletter, row)
     return JSONResponse(body, status_code=status)
 
 
+@app.get("/api/me")
+def me(request: Request):
+    who = identity.from_headers(request.headers)
+    return {"email": who.email, "user": who.user, "username": who.username, "verified": who.verified,
+            "user_token_forwarded": bool(request.headers.get("x-forwarded-access-token"))}
+
+
+@app.get("/api/health")
 @app.get("/healthz")
 def healthz():
     try:

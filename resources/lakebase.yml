@@ -1,19 +1,23 @@
 # Lakebase (Postgres gestionado) para los formularios de registro y newsletter.
-# Se usa Lakebase Provisioned (database_instances). Ver README → "Cambiar a Lakebase Autoscaling"
-# si se prefiere escalar a cero.
+# Se usa Lakebase Autoscaling (postgres_projects): Lakebase Provisioned (database_instances) ya no
+# admite instancias nuevas. Al crear el proyecto, Lakebase provisiona la rama `production`, su cómputo
+# `primary` y la base `databricks_postgres`, donde la App crea el esquema `forms`.
 resources:
-  database_instances:
+  postgres_projects:
     forms_db:
-      name: ${var.db_instance_name}
-      capacity: ${var.db_capacity}
-      retention_window_in_days: 7
+      project_id: ${var.db_project_id}
+      display_name: BimboBricks IQ · formularios (${bundle.target})
+      pg_version: 17
+      history_retention_duration: 604800s   # 7 días de point-in-time recovery
+      default_endpoint_settings:
+        autoscaling_limit_min_cu: 0.5
+        autoscaling_limit_max_cu: ${var.db_max_cu}
 
-  # Registra la base `bimbobricks` en Unity Catalog (la crea si no existe). Sirve para consultar
-  # registros desde SQL / dashboards / Genie sin copiar datos:
+  # Registra la base en Unity Catalog (catálogo nuevo: requiere CREATE CATALOG en el metastore).
+  # Sirve para consultar registros desde SQL / dashboards / Genie sin copiar datos:
   #   SELECT * FROM ${var.forms_catalog}.forms.registrations
-  database_catalogs:
+  postgres_catalogs:
     forms_catalog:
-      name: ${var.forms_catalog}
-      database_instance_name: ${resources.database_instances.forms_db.name}
-      database_name: bimbobricks
-      create_database_if_not_exists: true
+      catalog_id: ${var.forms_catalog}
+      branch: ${resources.postgres_projects.forms_db.name}/branches/production
+      postgres_database: databricks_postgres

@@ -20,6 +20,7 @@ import json, sys
 v = json.load(sys.stdin)["variables"]
 print("/Volumes/%s/%s/media" % (v["catalog"]["value"], v["schema"]["value"]))')
 if [ -f build/video.mp4 ]; then
+  "${DBX[@]}" fs mkdir "dbfs:${MEDIA}/media" "$@"
   "${DBX[@]}" fs cp --overwrite build/video.mp4 "dbfs:${MEDIA}/media/video.mp4" "$@"
   echo "  ✔ ${MEDIA}/media/video.mp4"
 else

@@ -24,13 +24,15 @@ para la web "BimboBricks IQ · Ola 2". Quiero desplegar el target `dev` y, si to
    por ese hook, quita solo el bloque `experimental:` de databricks.yml y reintenta.
 3. Verifica que existan estos recursos y enséñame su estado:
    - Esquema <CATALOGO>.bimbobricks_iq_dev con los Volumes `media` y `news_inbox`
-   - Instancia Lakebase `bimbobricks-iq-dev` (espera a que esté AVAILABLE) y el catálogo UC `bimbobricks_forms_dev`
-   - Databricks App `bimbobricks-iq-dev` con los recursos `forms-db` (database) y `media-volume` (volume)
+   - Proyecto Lakebase Autoscaling `bimbobricks-iq-dev` (rama `production`, cómputo `primary` activo) y el catálogo UC `bimbobricks_forms_dev`
+   - Databricks App `bimbobricks-iq-dev` con los recursos `forms-db` (postgres) y `media-volume` (volume), y autorización
+     de usuario activa (scope declarado `catalog.catalogs:read`; efectivos también `iam.current-user:read` e `iam.access-control:read`)
    - Job `bimbobricks-iq-news-dev` con trigger de llegada de archivos sobre /Volumes/<CATALOGO>/bimbobricks_iq_dev/news_inbox/
 4. Dime que suba el vídeo: debe quedar en /Volumes/<CATALOGO>/bimbobricks_iq_dev/media/media/video.mp4
    (Catalog Explorer → Volume media → crear carpeta "media" → Upload). Espera mi confirmación.
 5. Despliega e inicia la App (Deploy desde la carpeta files/app del bundle, o "Run" del recurso app en el panel del bundle).
-   Revisa los logs de arranque. Deben aparecer "Uvicorn running" y, al abrir /healthz, "store": "lakebase".
+   Revisa los logs de arranque. Deben aparecer "Uvicorn running" y, al abrir /api/health, "store": "lakebase".
+   Al abrir /api/me, después de aceptar el consentimiento, debe aparecer "verified": true.
 6. Prueba el Job: sube samples/items.example.json al Volume news_inbox y confirma que en ~2 minutos
    aparece /Volumes/<CATALOGO>/bimbobricks_iq_dev/media/news/news_block.html y que el inbox queda vacío.
 7. En el SQL Editor ejecuta:
@@ -49,7 +51,8 @@ Crea un Genie space con las tablas `bimbobricks_forms.forms.registrations` y `bi
 Estas tablas contienen los registros del programa de formación BimboBricks IQ · Ola 2 de Grupo Bimbo.
 - registrations: una fila por participante (email único). kickoff = asistirá al kick-off; kickoff_mode = remote|onsite;
   wave = se inscribe en la Ola 2; training_language = idioma del curso (es|en); submissions = veces que envió el formulario;
-  created_at = primer registro; updated_at = último envío. sso_email = cuenta Databricks con la que se envió.
+  created_at = primer registro; updated_at = último envío. sso_email = cuenta Databricks con la que se envió
+  (sso_verified = true si se confirmó con el token del usuario); email puede ser el de otra persona registrada por ella.
 - newsletter_subscriptions: suscriptores del newsletter; unsubscribed_at nulo = suscripción activa.
 Responde en español. Cuenta personas por email distinto. Las fechas están en UTC; conviértelas a America/Mexico_City.
 ```

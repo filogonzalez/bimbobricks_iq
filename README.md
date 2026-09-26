@@ -54,6 +54,21 @@ cp ~/Descargas/bimbobricks-iq_v13.html html/
 
 No hay que tocar nada más. Si el HTML nuevo rompe el contrato, `prepare.py` **detiene el deploy** antes de publicar y dice qué falta. Para probarlo sin desplegar: `python3 scripts/prepare.py`.
 
+### Editar el HTML (con o sin Claude Code)
+
+El HTML tiene líneas de hasta 8 MB (base64), así que no conviene abrirlo en un editor normal. Usa `scripts/html_tool.py`:
+```bash
+python3 scripts/html_tool.py outline                              # mapa del archivo
+python3 scripts/html_tool.py find "7 de octubre"                  # buscar (oculta los blobs)
+python3 scripts/html_tool.py i18n heroSub --es "…" --en "…"       # textos bilingües
+python3 scripts/html_tool.py replace --old "…" --new "…"          # reemplazo exacto y único
+python3 scripts/html_tool.py set-video nuevo.mp4                  # también: blobs / set-blob N img.webp
+python3 scripts/html_tool.py check                                # validar antes de desplegar
+python3 scripts/html_tool.py bump                                 # v12 → v13
+```
+En Claude Code, el skill de proyecto **`/editar-html`** (`.claude/skills/editar-html/`) sigue este flujo y conoce el
+mapa del archivo (`references/mapa-html.md`). Basta con pedir, por ejemplo: *"cambia el cierre de registro al 14 de octubre"*.
+
 ### Contrato con el HTML (lo que el dueño del HTML debe conservar)
 
 | Elemento | Para qué |

@@ -4,5 +4,6 @@ __pycache__/
 *.pyc
 .venv/
 .pytest_cache/
-.claude/
+.claude/worktrees/
+.claude/settings.local.json
 .DS_Store

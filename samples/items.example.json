@@ -1,0 +1,46 @@
+{
+  "updated_es": "Actualizado el 25 sep 2026 con fuentes oficiales de Databricks (web, X y LinkedIn).",
+  "updated_en": "Updated Sep 25, 2026 from official Databricks sources (web, X and LinkedIn).",
+  "items": [
+    {
+      "date_es": "24 sep 2026", "date_en": "Sep 24, 2026",
+      "tag_es": "Adquisición", "tag_en": "Acquisition",
+      "title_es": "Databricks compra Row Zero: hojas de cálculo en vivo dentro de Genie",
+      "title_en": "Databricks acquires Row Zero: live spreadsheets inside Genie",
+      "sum_es": "Row Zero es una hoja de cálculo conectada a datos gobernados que maneja miles de millones de filas. Se integrará en Genie para que negocio trabaje con la interfaz que ya conoce, con seguridad y trazabilidad.",
+      "sum_en": "Row Zero is a spreadsheet on governed, live data that handles billions of rows. It will be built into Genie so business teams work in a familiar interface, with security and auditability.",
+      "url": "https://www.databricks.com/company/newsroom/press-releases/databricks-acquires-row-zero-bringing-live-governed-spreadsheets",
+      "source": "Databricks Newsroom"
+    },
+    {
+      "date_es": "24 sep 2026", "date_en": "Sep 24, 2026",
+      "tag_es": "Anuncio", "tag_en": "Announcement",
+      "title_es": "Nace el «Databricks Field» en el estadio de Cal Berkeley",
+      "title_en": "Meet \"Databricks Field\" at Cal Berkeley's stadium",
+      "sum_es": "Alianza de varios años con Cal Athletics: el campo pasa a llamarse Databricks Field at California Memorial Stadium. Es el mayor patrocinio de su historia, y Databricks es su plataforma oficial de datos e IA.",
+      "sum_en": "A multi-year partnership with Cal Athletics renames the venue Databricks Field at California Memorial Stadium. It is Cal Athletics' largest sponsorship ever, and Databricks becomes its official data and AI platform.",
+      "url": "https://www.databricks.com/company/newsroom/press-releases/soda-hall-football-field-databricks-returns-berkeley-roots-cal",
+      "source": "Databricks Newsroom · Ali Ghodsi en X"
+    },
+    {
+      "date_es": "22 sep 2026", "date_en": "Sep 22, 2026",
+      "tag_es": "Disponible", "tag_en": "Now available",
+      "title_es": "Tres nuevos modelos de IA de frontera, ya en Databricks",
+      "title_en": "Three new frontier AI models, now on Databricks",
+      "sum_es": "GPT-6 Sol y GPT-6 Luna de OpenAI, y Claude Opus 5.5 de Anthropic, disponibles para los clientes de Databricks desde el primer día.",
+      "sum_en": "OpenAI's GPT-6 Sol and GPT-6 Luna and Anthropic's Claude Opus 5.5 are available to Databricks customers from day one.",
+      "url": "https://x.com/databricks/status/2102517464886079536",
+      "source": "Databricks en X"
+    },
+    {
+      "date_es": "25 sep 2026", "date_en": "Sep 25, 2026",
+      "tag_es": "Unity Gateway", "tag_en": "Unity Gateway",
+      "title_es": "Unity Gateway: 1,2 M$ al año en gasto de IA eliminado en una hora",
+      "title_en": "Unity Gateway: $1.2M a year in AI waste removed in one hour",
+      "sum_es": "Con el trazado de Unity Gateway y Genie One, Databricks encontró siete pequeños fallos que disparaban el gasto en tokens, y estimó un ahorro de 1,2 M$ al año en gasto y productividad.",
+      "sum_en": "Using Unity Gateway tracing and Genie One, Databricks found seven small bugs driving token spend, estimating $1.2M a year saved in AI spend and lost productivity.",
+      "url": "https://x.com/databricks/status/2103499039916400656",
+      "source": "Databricks en X"
+    }
+  ]
+}

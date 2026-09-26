@@ -1,0 +1,10 @@
+command: ["python", "run.py"]
+env:
+  # Recurso `media-volume` de la App (resources/app.yml) → "catalogo.esquema.volumen"
+  - name: MEDIA_VOLUME
+    valueFrom: media-volume
+  - name: ALLOWED_DOMAINS
+    value: "grupobimbo.com,gbsupport.net"
+  - name: NEWS_TTL_SECONDS
+    value: "60"
+  # PGHOST, PGPORT, PGDATABASE, PGUSER y PGSSLMODE los inyecta el recurso `forms-db` (Lakebase).

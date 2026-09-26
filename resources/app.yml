@@ -1,0 +1,22 @@
+resources:
+  apps:
+    bimbobricks_iq:
+      name: ${var.app_name}
+      description: BimboBricks IQ · Ola 2 — web del programa de formación (registro + newsletter + noticias)
+      source_code_path: ../app
+      resources:
+        # Inyecta PGHOST/PGPORT/PGDATABASE/PGUSER/PGSSLMODE; el SP de la App obtiene CONNECT + CREATE.
+        - name: forms-db
+          database:
+            instance_name: ${resources.database_instances.forms_db.name}
+            database_name: ${resources.database_catalogs.forms_catalog.database_name}
+            permission: CAN_CONNECT_AND_CREATE
+        # app.yaml lo expone como MEDIA_VOLUME
+        - name: media-volume
+          uc_securable:
+            securable_full_name: ${var.catalog}.${resources.schemas.bimbobricks.name}.${resources.volumes.media.name}
+            securable_type: VOLUME
+            permission: READ_VOLUME
+      permissions:
+        - group_name: ${var.app_users_group}
+          level: CAN_USE

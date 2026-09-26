@@ -1,0 +1,31 @@
+# Sustituye el proceso semanal _proceso-noticias/dbx_news.py.
+# Se dispara solo cuando alguien sube un .json al Volume news_inbox; también se puede lanzar a mano.
+resources:
+  jobs:
+    news_publish:
+      name: bimbobricks-iq-news-${bundle.target}
+      description: Publica el bloque "Databricks al día" desde items.json (subido a news_inbox)
+      max_concurrent_runs: 1
+      trigger:
+        pause_status: UNPAUSED
+        file_arrival:
+          url: /Volumes/${var.catalog}/${resources.schemas.bimbobricks.name}/${resources.volumes.news_inbox.name}/
+          min_time_between_triggers_seconds: 60
+          wait_after_last_change_seconds: 60
+      email_notifications:
+        on_failure:
+          - ${workspace.current_user.userName}
+      tasks:
+        - task_key: publish_news
+          environment_key: default
+          spark_python_task:
+            python_file: ../jobs/news/publish_news.py
+            parameters:
+              - --inbox
+              - /Volumes/${var.catalog}/${resources.schemas.bimbobricks.name}/${resources.volumes.news_inbox.name}
+              - --media
+              - /Volumes/${var.catalog}/${resources.schemas.bimbobricks.name}/${resources.volumes.media.name}
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "2"

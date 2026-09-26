@@ -1,0 +1,24 @@
+# Unity Catalog: esquema + Volumes
+#   media       → media/video.mp4 (lo sube deploy.sh) y news/news_block.html (lo escribe el Job)
+#   news_inbox  → aquí se sube a mano items.json; su llegada dispara el Job de noticias
+resources:
+  schemas:
+    bimbobricks:
+      catalog_name: ${var.catalog}
+      name: ${var.schema}
+      comment: BimboBricks IQ · Ola 2 — medios y noticias de la web del programa
+
+  volumes:
+    media:
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.bimbobricks.name}
+      name: media
+      volume_type: MANAGED
+      comment: Vídeo de la web y bloque de noticias publicado
+
+    news_inbox:
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.bimbobricks.name}
+      name: news_inbox
+      volume_type: MANAGED
+      comment: Sube aquí items.json (Catalog Explorer → Upload). El Job lo procesa y lo vacía.

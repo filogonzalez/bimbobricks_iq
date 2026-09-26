@@ -1,0 +1,19 @@
+# Lakebase (Postgres gestionado) para los formularios de registro y newsletter.
+# Se usa Lakebase Provisioned (database_instances). Ver README → "Cambiar a Lakebase Autoscaling"
+# si se prefiere escalar a cero.
+resources:
+  database_instances:
+    forms_db:
+      name: ${var.db_instance_name}
+      capacity: ${var.db_capacity}
+      retention_window_in_days: 7
+
+  # Registra la base `bimbobricks` en Unity Catalog (la crea si no existe). Sirve para consultar
+  # registros desde SQL / dashboards / Genie sin copiar datos:
+  #   SELECT * FROM ${var.forms_catalog}.forms.registrations
+  database_catalogs:
+    forms_catalog:
+      name: ${var.forms_catalog}
+      database_instance_name: ${resources.database_instances.forms_db.name}
+      database_name: bimbobricks
+      create_database_if_not_exists: true

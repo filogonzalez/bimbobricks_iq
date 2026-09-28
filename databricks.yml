@@ -56,10 +56,11 @@ targets:
       # app_users_group: el valor por defecto (users) → la ve todo el workspace, igual que prod
 
   prod:
+    # Workspace sandbox (709692038187649), el mismo del Self-Assessment
     workspace:
-      host: https://adb-1844781131568521.1.azuredatabricks.net
+      host: https://adb-709692038187649.9.azuredatabricks.net
     variables:
-      catalog: main                     # ← AJUSTAR al catálogo real
+      catalog: cat_bimbobricks_sb
       schema: bimbobricks_iq
       forms_catalog: bimbobricks_forms
       app_name: bimbobricks-iq
@@ -67,3 +68,11 @@ targets:
     permissions:
       - level: CAN_MANAGE
         user_name: ${workspace.current_user.userName}
+    # Los permisos del target también se aplican al proyecto Lakebase: sin esta línea pisarían el acceso
+    # que el recurso `forms-db` le da al service principal de la App.
+    resources:
+      postgres_projects:
+        forms_db:
+          permissions:
+            - level: CAN_USE
+              service_principal_name: ${resources.apps.bimbobricks_iq.service_principal_client_id}

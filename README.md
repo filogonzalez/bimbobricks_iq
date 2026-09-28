@@ -2,7 +2,9 @@
 
 La web del programa de formación de Grupo Bimbo, publicada como **Databricks App**, con los formularios en **Lakebase**, el vídeo en un **Volume** y las noticias gestionadas por un **Job**.
 
-Workspace destino: `https://adb-1844781131568521.1.azuredatabricks.net` (hay que estar en la VPN FortiClient).
+Workspaces destino (hay que estar en la VPN FortiClient):
+- `dev`: `https://adb-1844781131568521.1.azuredatabricks.net`, catálogo `cat_coe_dv`.
+- `prod`: `https://adb-709692038187649.9.azuredatabricks.net` (el workspace sandbox, el mismo del Self-Assessment), catálogo `cat_bimbobricks_sb`.
 
 ```
 html/<tu-archivo>.html        ← LO ÚNICO QUE CAMBIAS (exactamente un .html)
@@ -30,10 +32,11 @@ POST /api/ideas, /api/access-requests ──► Lakebase  forms.ideas / forms.ac
 
 ## Primer despliegue
 
-1. **Ajusta el catálogo** en `databricks.yml` → `targets.<dev|prod>.variables.catalog`. `dev` usa `cat_coe_dv`; `prod` todavía dice `main`. Tiene que ser un catálogo existente donde puedas crear esquemas. El catálogo `forms_catalog` (`bimbobricks_forms[_dev]`) es nuevo, así que quien despliega necesita además `CREATE CATALOG` en el metastore.
+1. **Ajusta el catálogo** en `databricks.yml` → `targets.<dev|prod>.variables.catalog`. `dev` usa `cat_coe_dv` y `prod`, `cat_bimbobricks_sb`. Tiene que ser un catálogo existente donde puedas crear esquemas. El catálogo `forms_catalog` (`bimbobricks_forms[_dev]`) es nuevo, así que quien despliega necesita además `CREATE CATALOG` en el metastore.
 2. Conéctate a la VPN y autentícate:
    ```bash
-   databricks auth login --host https://adb-1844781131568521.1.azuredatabricks.net --profile bimbo
+   databricks auth login --host https://adb-1844781131568521.1.azuredatabricks.net --profile bimbo        # dev
+   databricks auth login --host https://adb-709692038187649.9.azuredatabricks.net --profile bimbo_sandbox    # prod
    ```
 3. Despliega en **dev** (la ven todos los usuarios del workspace, grupo `users`):
    ```bash
@@ -41,7 +44,7 @@ POST /api/ideas, /api/access-requests ──► Lakebase  forms.ideas / forms.ac
    ```
    La primera vez el proyecto Lakebase tarda unos minutos en crearse.
 4. Abre la URL que imprime el script. La primera vez Databricks pide consentimiento para que la App lea tu identidad (ver [Identidad de quien envía](#identidad-de-quien-envía-autorización-en-nombre-del-usuario)). Envía un registro de prueba y revisa `/api/health` (debe decir `"store": "lakebase", "store_ok": true`) y `/api/me` (debe decir `"verified": true`).
-5. Cuando todo funcione, **prod**: `./deploy.sh prod -p bimbo`
+5. Cuando todo funcione, **prod**: `./deploy.sh prod -p bimbo_sandbox`
 
 `deploy.sh` ejecuta: `bundle validate` → `bundle deploy` (el hook ejecuta `prepare.py`) → sube `build/video.mp4` al Volume → `bundle run bimbobricks_iq` (publica el código y arranca la App).
 
@@ -50,7 +53,7 @@ POST /api/ideas, /api/access-requests ──► Lakebase  forms.ideas / forms.ac
 ```bash
 rm html/*.html
 cp ~/Descargas/bimbobricks-iq_v39.html html/
-./deploy.sh prod -p bimbo
+./deploy.sh prod -p bimbo_sandbox
 ```
 
 No hay que tocar nada más. Si el HTML nuevo rompe el contrato, `prepare.py` **detiene el deploy** antes de publicar y dice qué falta. Para probarlo sin desplegar: `python3 scripts/prepare.py`.

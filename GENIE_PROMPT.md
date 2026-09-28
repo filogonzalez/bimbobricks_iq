@@ -53,7 +53,8 @@ Estas tablas contienen los registros del programa de formación BimboBricks IQ �
   wave = se inscribe en la Ola 2; training_language = idioma del curso (es|en); submissions = veces que envió el formulario;
   created_at = primer registro; updated_at = último envío. sso_email = cuenta Databricks con la que se envió
   (sso_verified = true si se confirmó con el token del usuario); email puede ser el de otra persona registrada por ella.
-- newsletter_subscriptions: suscriptores del newsletter; unsubscribed_at nulo = suscripción activa.
+- newsletter_subscriptions: suscriptores del newsletter; unsubscribed_at nulo = suscripción activa; source = 'registro'
+  si se suscribió desde el formulario de registro.
 - ideas: ideas de casos de uso enviadas desde "Construye" (una fila por idea). access_requests: solicitudes de acceso a
   Databricks (una fila por solicitud; role, urgency). En registrations, raw->>'mentorInterest' y raw->>'newsletter' traen
   el interés en ser mentor/champion y en el newsletter.

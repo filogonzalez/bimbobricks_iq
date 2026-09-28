@@ -98,7 +98,7 @@ Para republicar a mano un archivo concreto: *Run now with different parameters* 
 - `forms.registrations`: una fila por email (PK). Si alguien se registra de nuevo, se actualiza y `submissions` suma 1.
 - `forms.newsletter_subscriptions`: una fila por email.
 - `forms.ideas` ("Envía tu idea", sección Construye) y `forms.access_requests` ("Solicita tu acceso"): una fila por envío; el resto del formulario queda en `raw`.
-- El registro de v38 trae además `newsletter`, `mentorInterest`, `hasDatabricksAccount` y `accessRequest`: se guardan en `raw` (p. ej. `raw->>'mentorInterest'`). Marcar "newsletter: sí" en el registro **no** crea una fila en `newsletter_subscriptions`.
+- El registro de v38 trae además `newsletter`, `mentorInterest`, `hasDatabricksAccount` y `accessRequest`: se guardan en `raw` (p. ej. `raw->>'mentorInterest'`). Si marca "newsletter: sí", `/api/register` también la suscribe en `newsletter_subscriptions` con `source = 'registro'` y la misma identidad, en la misma transacción. Si ya estaba suscrita, se reactiva y se conserva su `source` original; un "no" nunca da de baja a nadie.
 - Doble validación de dominio: la API (`app/models.py`, variable `ALLOWED_DOMAINS` en `app/app.yaml`) y un `CHECK` en Postgres.
 - `sso_email`, `sso_user`, `sso_username` y `sso_verified` guardan quién envió el formulario según Databricks Apps (ver la sección siguiente). El campo `email` es lo que la persona escribió; puede registrar a un colega, pero `sso_email` dice quién lo hizo.
 

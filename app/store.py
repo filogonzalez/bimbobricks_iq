@@ -52,6 +52,20 @@ ON CONFLICT (email) DO UPDATE SET
 RETURNING (xmax = 0) AS inserted
 """
 
+# Quien marca "sí" al newsletter en el registro. Si ya estaba suscrito se reactiva y se conserva el
+# `source` original (cómo se suscribió); un "no" en el registro nunca da de baja a nadie.
+SUBSCRIBE_FROM_REGISTRATION = """
+INSERT INTO forms.newsletter_subscriptions AS n (
+  email, lang, source, sso_email, sso_user, sso_username, sso_verified, client_ts)
+VALUES (%(email)s, %(lang)s, %(source)s, %(sso_email)s, %(sso_user)s, %(sso_username)s,
+  %(sso_verified)s, %(ts)s)
+ON CONFLICT (email) DO UPDATE SET
+  sso_email = EXCLUDED.sso_email, sso_user = EXCLUDED.sso_user, sso_username = EXCLUDED.sso_username,
+  sso_verified = EXCLUDED.sso_verified, unsubscribed_at = NULL, updated_at = now()
+"""
+
+IDENTITY_COLUMNS = ("sso_email", "sso_user", "sso_username", "sso_verified")
+
 INSERT_IDEA = """
 INSERT INTO forms.ideas (email, name, area, idea, sso_email, sso_user, sso_username, sso_verified,
   client_submitted_at, raw)
@@ -67,6 +81,14 @@ VALUES (%(email)s, %(name)s, %(country)s, %(area)s, %(role)s, %(urgency)s, %(sso
   %(sso_username)s, %(sso_verified)s, %(submitted_at)s, %(raw)s)
 RETURNING true AS inserted
 """
+
+
+def newsletter_from_registration(row):
+    """Fila de newsletter para quien marcó "sí" en el registro, o None si no lo marcó."""
+    if row.get("newsletter") is not True:
+        return None
+    return {"email": row["email"], "lang": row.get("ui_language"), "source": "registro",
+            "ts": row.get("submitted_at"), **{k: row.get(k) for k in IDENTITY_COLUMNS}}
 
 
 class MemoryStore:
@@ -89,7 +111,17 @@ class MemoryStore:
             return True
 
     def upsert_registration(self, row):
-        return self._put(self.registrations, row)
+        with self._lock:
+            inserted = row["email"] not in self.registrations
+            self.registrations[row["email"]] = row
+            sub = newsletter_from_registration(row)
+            if sub:
+                current = self.newsletter.get(sub["email"])
+                if current:
+                    current.update({k: sub[k] for k in IDENTITY_COLUMNS}, unsubscribed_at=None)
+                else:
+                    self.newsletter[sub["email"]] = sub
+            return inserted
 
     def upsert_newsletter(self, row):
         return self._put(self.newsletter, row)
@@ -150,16 +182,27 @@ class LakebaseStore:
             log.info("Lakebase listo (esquema forms verificado) · host=%s db=%s endpoint=%s",
                      os.getenv("PGHOST"), os.getenv("PGDATABASE"), os.getenv("LAKEBASE_ENDPOINT"))
 
-    def _write(self, sql, row):
-        self._init()
+    @staticmethod
+    def _params(row):
         params = dict(row)
         if "raw" in params:
             params["raw"] = Jsonb(params["raw"])
+        return params
+
+    def _write(self, sql, row):
+        self._init()
         with self._pool.connection() as c:
-            return bool(c.execute(sql, params).fetchone()[0])
+            return bool(c.execute(sql, self._params(row)).fetchone()[0])
 
     def upsert_registration(self, row):
-        return self._write(UPSERT_REGISTRATION, row)
+        self._init()
+        sub = newsletter_from_registration(row)
+        # Registro y suscripción van en la misma transacción: o se guardan los dos o ninguno.
+        with self._pool.connection() as c, c.transaction():
+            inserted = bool(c.execute(UPSERT_REGISTRATION, self._params(row)).fetchone()[0])
+            if sub:
+                c.execute(SUBSCRIBE_FROM_REGISTRATION, sub)
+        return inserted
 
     def upsert_newsletter(self, row):
         return self._write(UPSERT_NEWSLETTER, row)

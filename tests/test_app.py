@@ -68,6 +68,34 @@ def test_register_upsert_and_raw(client):
     assert row["raw"]["mentorInterest"] == "both" and row["raw"]["accessRequest"] is True
 
 
+def test_registration_newsletter_yes_subscribes_with_identity(client):
+    for _ in range(2):  # reintento: sigue habiendo una sola suscripción
+        assert client.post("/api/register", json=REG, headers=SSO).status_code == 200
+    nl = client.main.store.newsletter
+    assert list(nl) == ["ana.perez@grupobimbo.com"]
+    sub = nl["ana.perez@grupobimbo.com"]
+    assert sub["source"] == "registro" and sub["lang"] == "es"
+    assert sub["sso_email"] == "ana.perez@grupobimbo.com" and sub["sso_user"] == SSO["X-Forwarded-User"]
+
+
+@pytest.mark.parametrize("answer", [False, None])
+def test_registration_without_newsletter_does_not_touch_subscriptions(client, answer):
+    body = {k: v for k, v in REG.items() if k != "newsletter"} if answer is None else {**REG, "newsletter": answer}
+    client.post("/api/newsletter", json={"email": "ana.perez@grupobimbo.com", "source": "newsletter-form"}, headers=SSO)
+    before = dict(client.main.store.newsletter["ana.perez@grupobimbo.com"])
+    assert client.post("/api/register", json=body, headers=SSO).status_code == 200
+    assert client.main.store.newsletter["ana.perez@grupobimbo.com"] == before
+
+
+def test_registration_newsletter_yes_keeps_original_source_and_reactivates(client):
+    client.post("/api/newsletter", json={"email": "ana.perez@grupobimbo.com", "source": "newsletter-form"})
+    client.main.store.newsletter["ana.perez@grupobimbo.com"]["unsubscribed_at"] = "2026-09-01T00:00:00Z"
+    client.post("/api/register", json=REG, headers=SSO)
+    sub = client.main.store.newsletter["ana.perez@grupobimbo.com"]
+    assert sub["source"] == "newsletter-form" and sub["unsubscribed_at"] is None
+    assert sub["sso_email"] == "ana.perez@grupobimbo.com"
+
+
 def test_ideas_and_access_requests_append_with_identity(client):
     for _ in range(2):
         assert client.post("/api/ideas", json=IDEA, headers=SSO).json() == {"ok": True, "created": True}
@@ -159,6 +187,7 @@ def test_rows_cover_every_sql_parameter(client):
     s = client.main.store
     assert params(store.UPSERT_REGISTRATION) <= set(s.registrations["ana.perez@grupobimbo.com"])
     assert params(store.UPSERT_NEWSLETTER) <= set(s.newsletter["luis@gbsupport.net"])
+    assert params(store.SUBSCRIBE_FROM_REGISTRATION) <= set(s.newsletter["ana.perez@grupobimbo.com"])
     assert params(store.INSERT_IDEA) <= set(s.ideas[0])
     assert params(store.INSERT_ACCESS_REQUEST) <= set(s.access_requests[0])
 

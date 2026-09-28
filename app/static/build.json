@@ -1,10 +1,10 @@
 {
   "source_file": "bimbobricks-iq_v38_capacitacion-2026.html",
-  "source_sha256": "cba1be797508aed3dc98eca2ff232f53938ea867bbe2b7e20623a12fab1eaf26",
+  "source_sha256": "6a09f41b925a2bef2c9984c767f167487d31a4d4a7b93aef0e55c94141148522",
   "source_mb": 8.92,
-  "output_sha256": "d6934a7d506a3ac7be4d9a195bce7c7d11175bdc89315234ab35a94afb3f3dc1",
+  "output_sha256": "70788b4bd8814c486606bf8bf360cf9b34c01e855f4a5d95ff37f3a864c0882f",
   "output_mb": 0.92,
   "video_sha256": "be5e633153c1eb1c1fc8414b50956ef747b5dfc39f8e84b8152b483dcde22bca",
   "video_mb": 6.0,
-  "built_at": "2026-09-28T19:25:47+00:00"
+  "built_at": "2026-09-28T20:27:20+00:00"
 }

@@ -49,12 +49,13 @@ Para añadir una sección:
 
 | Clave | Uso |
 |---|---|
-| `selfAssessmentUrl` | enlace al Self-Assessment (otra Databricks App); el botón `#saBtn` también lo trae en el HTML |
+| `selfAssessmentUrl` | Self-Assessment de 5 minutos (otra Databricks App, en el workspace sandbox, con su propio Lakebase): `https://bimbo-training-app-709692038187649.9.azure.databricksapps.com/`. El `href` de `#saBtn` en el HTML debe ser el mismo; el JS lo vuelve a poner desde CONFIG |
 | `videoMain` / `videoDatabricks` | vídeos; `videoDatabricks` acepta una URL embebible (YouTube /embed/, Stream, Vimeo) o un .mp4 |
 | `registrationEndpoint` | ⚙ lo reescribe el deploy (`/api/register`); no lo edites |
 | `ideasEndpoint` / `accessEndpoint` | ⚙ los reescribe el deploy (`/api/ideas`, `/api/access-requests`); vacíos = modo demostración |
-| `sandboxUrl` | URL del Sandbox de Desarrollo; vacío = el botón abre "Solicita tu acceso" |
-| `communityUrl`, `contactEmail`, `contactName` | datos de la comunidad y del contacto (hoy vacíos; `contactEmail` activa "Contáctanos" en mentores) |
+| `sandboxUrl` | URL del Sandbox de Desarrollo: hoy `https://adb-709692038187649.9.azuredatabricks.net/` (workspace sandbox). El botón `#sbxBtn` de Construye lo abre en otra pestaña; vacío = el botón lleva a "Solicita tu acceso" (que sigue en Registro, `<details id="accessX">`) |
+| `communityUrl` | canal de la comunidad; hoy vacío, y así el botón `#commBtn` ("Entrar a la comunidad") queda oculto |
+| `contactEmail`, `contactName` | contacto del programa: hoy `yesenia.alejandro@gbsupport.net` / "Yesenia Alejandro". Con correo, "Contáctanos" (`#chMail`, mentores) abre un mailto, aparece el botón de "Comparte tu historia" en Comunidad y el pie muestra el contacto; vacío = "Contáctanos" lleva al registro |
 | `links.{academy, docs, whatIs, support, pastVideos, hackathonReport}` | enlaces de Recursos |
 | `pastEvents[]` | `{icon, url, es:{t,d}, en:{t,d}}` |
 | `testimonials[]` | `{quote:{es,en}, name, role}` (vacío) |

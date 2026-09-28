@@ -39,6 +39,7 @@ class Registration(BaseModel):
     ui_language: Optional[str] = Field(default=None, alias="uiLanguage", max_length=10)
     submitted_at: Optional[datetime] = Field(default=None, alias="submittedAt")
     source: Optional[str] = Field(default=None, max_length=100)
+    newsletter: Optional[bool] = None  # v38: "¿Quieres recibir el newsletter?" → suscripción desde el registro
 
     @field_validator("email")
     @classmethod

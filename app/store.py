@@ -52,12 +52,29 @@ ON CONFLICT (email) DO UPDATE SET
 RETURNING (xmax = 0) AS inserted
 """
 
+INSERT_IDEA = """
+INSERT INTO forms.ideas (email, name, area, idea, sso_email, sso_user, sso_username, sso_verified,
+  client_submitted_at, raw)
+VALUES (%(email)s, %(name)s, %(area)s, %(idea)s, %(sso_email)s, %(sso_user)s, %(sso_username)s,
+  %(sso_verified)s, %(submitted_at)s, %(raw)s)
+RETURNING true AS inserted
+"""
+
+INSERT_ACCESS_REQUEST = """
+INSERT INTO forms.access_requests (email, name, country, area, role, urgency, sso_email, sso_user,
+  sso_username, sso_verified, client_submitted_at, raw)
+VALUES (%(email)s, %(name)s, %(country)s, %(area)s, %(role)s, %(urgency)s, %(sso_email)s, %(sso_user)s,
+  %(sso_username)s, %(sso_verified)s, %(submitted_at)s, %(raw)s)
+RETURNING true AS inserted
+"""
+
 
 class MemoryStore:
     kind = "memory"
 
     def __init__(self):
         self.registrations, self.newsletter = {}, {}
+        self.ideas, self.access_requests = [], []
         self._lock = threading.Lock()
 
     def _put(self, table, row):
@@ -66,11 +83,22 @@ class MemoryStore:
             table[row["email"]] = row
             return inserted
 
+    def _append(self, table, row):
+        with self._lock:
+            table.append(row)
+            return True
+
     def upsert_registration(self, row):
         return self._put(self.registrations, row)
 
     def upsert_newsletter(self, row):
         return self._put(self.newsletter, row)
+
+    def add_idea(self, row):
+        return self._append(self.ideas, row)
+
+    def add_access_request(self, row):
+        return self._append(self.access_requests, row)
 
     def ping(self):
         return True
@@ -122,7 +150,7 @@ class LakebaseStore:
             log.info("Lakebase listo (esquema forms verificado) · host=%s db=%s endpoint=%s",
                      os.getenv("PGHOST"), os.getenv("PGDATABASE"), os.getenv("LAKEBASE_ENDPOINT"))
 
-    def _upsert(self, sql, row):
+    def _write(self, sql, row):
         self._init()
         params = dict(row)
         if "raw" in params:
@@ -131,10 +159,16 @@ class LakebaseStore:
             return bool(c.execute(sql, params).fetchone()[0])
 
     def upsert_registration(self, row):
-        return self._upsert(UPSERT_REGISTRATION, row)
+        return self._write(UPSERT_REGISTRATION, row)
 
     def upsert_newsletter(self, row):
-        return self._upsert(UPSERT_NEWSLETTER, row)
+        return self._write(UPSERT_NEWSLETTER, row)
+
+    def add_idea(self, row):
+        return self._write(INSERT_IDEA, row)
+
+    def add_access_request(self, row):
+        return self._write(INSERT_ACCESS_REQUEST, row)
 
     def ping(self):
         self._init()

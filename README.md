@@ -12,6 +12,7 @@ app/static/index.html (~0,6 MB) ──► Databricks App (FastAPI, SSO + autoriz
 build/video.mp4 (~6 MB)         ──► Volume  media/media/video.mp4 ──► GET /media/video.mp4 (Range)
                                     Volume  media/news/news_block.html ◄── Job de noticias ◄── items.json en news_inbox
 POST /api/register, /api/newsletter ──► Lakebase  forms.registrations / forms.newsletter_subscriptions
+POST /api/ideas, /api/access-requests ──► Lakebase  forms.ideas / forms.access_requests
                                          └─ expuesto en UC como <forms_catalog>.forms.*
 ```
 
@@ -48,7 +49,7 @@ POST /api/register, /api/newsletter ──► Lakebase  forms.registrations / fo
 
 ```bash
 rm html/*.html
-cp ~/Descargas/bimbobricks-iq_v13.html html/
+cp ~/Descargas/bimbobricks-iq_v39.html html/
 ./deploy.sh prod -p bimbo
 ```
 
@@ -64,7 +65,7 @@ python3 scripts/html_tool.py i18n heroSub --es "…" --en "…"       # textos b
 python3 scripts/html_tool.py replace --old "…" --new "…"          # reemplazo exacto y único
 python3 scripts/html_tool.py set-video nuevo.mp4                  # también: blobs / set-blob N img.webp
 python3 scripts/html_tool.py check                                # validar antes de desplegar
-python3 scripts/html_tool.py bump                                 # v12 → v13
+python3 scripts/html_tool.py bump                                 # v38 → v39
 ```
 En Claude Code, el skill de proyecto **`/editar-html`** (`.claude/skills/editar-html/`) sigue este flujo y conoce el
 mapa del archivo (`references/mapa-html.md`). Basta con pedir, por ejemplo: *"cambia el cierre de registro al 14 de octubre"*.
@@ -76,6 +77,7 @@ mapa del archivo (`references/mapa-html.md`). Basta con pedir, por ejemplo: *"ca
 | `<form … id="regForm">` y `<form class="bb-nl" id="bbNl" …>` | formularios |
 | `registrationEndpoint: "…"` dentro de `CONFIG` | se reescribe a `/api/register` |
 | `var NL_ENDPOINT="…"` | se reescribe a `/api/newsletter` |
+| `ideasEndpoint: "…"` y `accessEndpoint: "…"` dentro de `CONFIG` (opcionales, desde v13) | se reescriben a `/api/ideas` y `/api/access-requests` |
 | `videoMain: (window.__bbVideoUrl \|\| "")` | se apunta a `/media/video.mp4` |
 | `<script type="application/octet-stream" id="bbVideoData">` (opcional) | el vídeo se extrae de aquí; si no está, se conserva el vídeo que ya esté en el Volume |
 | `<section id="bb-dbx-news">…</section>` (o el `<form id="bbNl">` como ancla) | ahí se insertan las noticias |
@@ -95,6 +97,8 @@ Para republicar a mano un archivo concreto: *Run now with different parameters* 
 
 - `forms.registrations`: una fila por email (PK). Si alguien se registra de nuevo, se actualiza y `submissions` suma 1.
 - `forms.newsletter_subscriptions`: una fila por email.
+- `forms.ideas` ("Envía tu idea", sección Construye) y `forms.access_requests` ("Solicita tu acceso"): una fila por envío; el resto del formulario queda en `raw`.
+- El registro de v38 trae además `newsletter`, `mentorInterest`, `hasDatabricksAccount` y `accessRequest`: se guardan en `raw` (p. ej. `raw->>'mentorInterest'`). Marcar "newsletter: sí" en el registro **no** crea una fila en `newsletter_subscriptions`.
 - Doble validación de dominio: la API (`app/models.py`, variable `ALLOWED_DOMAINS` en `app/app.yaml`) y un `CHECK` en Postgres.
 - `sso_email`, `sso_user`, `sso_username` y `sso_verified` guardan quién envió el formulario según Databricks Apps (ver la sección siguiente). El campo `email` es lo que la persona escribió; puede registrar a un colega, pero `sso_email` dice quién lo hizo.
 

@@ -1,10 +1,10 @@
 {
-  "source_file": "bimbobricks-iq_v12_cta-academy.html",
-  "source_sha256": "b89ddea3fff1bb371a57490fb33b13da8abe4f62f7cd4b133326515395a02d5d",
-  "source_mb": 8.64,
-  "output_sha256": "69382ab2fc2ffad3530f0c4e04ca1e666deda5886ec00b7a432b94c219bdb774",
-  "output_mb": 0.64,
+  "source_file": "bimbobricks-iq_v38_capacitacion-2026.html",
+  "source_sha256": "cba1be797508aed3dc98eca2ff232f53938ea867bbe2b7e20623a12fab1eaf26",
+  "source_mb": 8.92,
+  "output_sha256": "d6934a7d506a3ac7be4d9a195bce7c7d11175bdc89315234ab35a94afb3f3dc1",
+  "output_mb": 0.92,
   "video_sha256": "be5e633153c1eb1c1fc8414b50956ef747b5dfc39f8e84b8152b483dcde22bca",
   "video_mb": 6.0,
-  "built_at": "2026-09-26T18:02:55+00:00"
+  "built_at": "2026-09-28T19:25:47+00:00"
 }

@@ -13,7 +13,18 @@ import store
 REG = {"name": "Ana Pérez", "email": "Ana.Perez@GrupoBimbo.com", "country": "MX", "area": "Finanzas",
        "kickoff": True, "kickoffMode": "remote", "wave": True, "trainingLanguage": "es",
        "selfAssessmentDone": True, "uiLanguage": "es", "submittedAt": "2026-09-26T10:00:00Z",
-       "source": "bimbobricks-iq-landing-wave2", "campoNuevo": 42}
+       "source": "bimbobricks-iq-landing-wave2", "campoNuevo": 42,
+       # campos que añade el HTML v38 (van a `raw`)
+       "newsletter": True, "mentorInterest": "both", "hasDatabricksAccount": "No", "accessRequest": True}
+
+# Payloads tal como los envía el HTML v38 ("Envía tu idea" y "Solicita tu acceso")
+IDEA = {"type": "idea", "name": "Ana Pérez", "email": "Ana.Perez@GrupoBimbo.com", "area": "Finance",
+        "idea": "Tablero de ventas por ruta con Genie", "problem": "", "dataNeeded": "", "uiLanguage": "es",
+        "submittedAt": "2026-09-28T10:00:00Z", "source": "bimbobricks-iq-construye"}
+ACCESS = {"type": "accessRequest", "accessRequest": True, "name": "Ana Pérez", "email": "ana.perez@grupobimbo.com",
+          "country": "México", "area": "IT", "role": "Analista", "currentAccess": ["Excel", "Power BI"],
+          "hasDatabricksAccount": "No", "reason": "", "expectedImpact": "Automatización", "urgency": "Medio",
+          "uiLanguage": "es", "submittedAt": "2026-09-28T10:00:00Z", "source": "bimbobricks-iq-registro"}
 
 # Cabeceras que añade el proxy de Databricks Apps a cada petición autenticada
 SSO = {"X-Forwarded-Email": "Ana.Perez@GrupoBimbo.com", "X-Forwarded-User": "6459219705358936@1844781131568521",
@@ -54,6 +65,33 @@ def test_register_upsert_and_raw(client):
     assert r.json()["created"] is False
     row = client.main.store.registrations["ana.perez@grupobimbo.com"]
     assert row["raw"]["campoNuevo"] == 42 and row["training_language"] == "es"
+    assert row["raw"]["mentorInterest"] == "both" and row["raw"]["accessRequest"] is True
+
+
+def test_ideas_and_access_requests_append_with_identity(client):
+    for _ in range(2):
+        assert client.post("/api/ideas", json=IDEA, headers=SSO).json() == {"ok": True, "created": True}
+    assert client.post("/api/access-requests", json=ACCESS, headers=SSO).status_code == 200
+    ideas, access = client.main.store.ideas, client.main.store.access_requests
+    assert len(ideas) == 2 and len(access) == 1  # una fila por envío
+    assert ideas[0]["email"] == "ana.perez@grupobimbo.com" and ideas[0]["sso_email"] == "ana.perez@grupobimbo.com"
+    assert access[0]["role"] == "Analista" and access[0]["raw"]["currentAccess"] == ["Excel", "Power BI"]
+
+
+@pytest.mark.parametrize("path,body", [
+    ("/api/ideas", {**IDEA, "email": "x@gmail.com"}),
+    ("/api/ideas", {**IDEA, "idea": "corta"}),
+    ("/api/access-requests", {**ACCESS, "name": " "}),
+])
+def test_ideas_and_access_requests_validation(client, path, body):
+    assert client.post(path, json=body, headers=SSO).status_code == 422
+
+
+def test_ideas_and_access_requests_need_identity_inside_databricks_apps(client, monkeypatch):
+    monkeypatch.setenv("DATABRICKS_APP_NAME", "bimbobricks-iq-dev")
+    assert client.post("/api/ideas", json=IDEA).status_code == 401
+    assert client.post("/api/access-requests", json=ACCESS).status_code == 401
+    assert client.main.store.ideas == [] and client.main.store.access_requests == []
 
 
 def test_identity_comes_from_proxy_headers_not_from_body(client):
@@ -112,12 +150,17 @@ def test_me(client, monkeypatch):
 def test_rows_cover_every_sql_parameter(client):
     client.post("/api/register", json=REG, headers=SSO)
     client.post("/api/newsletter", json={"email": "luis@gbsupport.net"}, headers=SSO)
+    client.post("/api/ideas", json=IDEA, headers=SSO)
+    client.post("/api/access-requests", json=ACCESS, headers=SSO)
 
     def params(sql):
         return set(re.findall(r"%\((\w+)\)s", sql))
 
-    assert params(store.UPSERT_REGISTRATION) <= set(client.main.store.registrations["ana.perez@grupobimbo.com"])
-    assert params(store.UPSERT_NEWSLETTER) <= set(client.main.store.newsletter["luis@gbsupport.net"])
+    s = client.main.store
+    assert params(store.UPSERT_REGISTRATION) <= set(s.registrations["ana.perez@grupobimbo.com"])
+    assert params(store.UPSERT_NEWSLETTER) <= set(s.newsletter["luis@gbsupport.net"])
+    assert params(store.INSERT_IDEA) <= set(s.ideas[0])
+    assert params(store.INSERT_ACCESS_REQUEST) <= set(s.access_requests[0])
 
 
 @pytest.mark.parametrize("email", ["x@gmail.com", "x@grupobimbo.com.mx", "x@evil-grupobimbo.com", "sin-arroba"])

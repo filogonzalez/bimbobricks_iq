@@ -1,27 +1,32 @@
-# Mapa del HTML (v12 · bimbobricks-iq_v12_cta-academy.html)
+# Mapa del HTML (v38 · bimbobricks-iq_v38_capacitacion-2026.html)
 
-Los números de línea son orientativos: confírmalos con `html_tool.py outline` y `find`.
+Título: "BimboBricks · Nueva Capacitación 2026". Los números de línea son orientativos: confírmalos con
+`html_tool.py outline` y `find`.
 
 ## Estructura
 
-| Zona | Líneas v12 | Qué contiene |
+| Zona | Líneas v38 | Qué contiene |
 |---|---|---|
 | `<head>`, comentario inicial | 1–14 | metadatos, Google Fonts (Nunito) |
 | `<style>` principal | 15–343 | variables de tema en `:root` (`--navy`, `--blue`, `--gold`, `--red`, `--cream`…), layout |
-| `<style id="bb-theme">` | 344–~525 | capa de marca "Bimbo" y CSS de "Databricks al día"; el deploy añade aquí el CSS de noticias si falta |
-| Banner y cabecera | ~529–540 | logo PNG/SVG en base64 ⚠ |
-| Secciones (`<section class="panel" id=…>`) | 543–~870 | `inicio`, `que-es`, `databricks`, `ruta`, `registro`, `eventos`, `noticias` (incluye `bb-dbx-news` y el form `bbNl`), `comunidad`, `recursos` |
-| Modal de vídeo | ~872 | `<dialog>` con `#vmBody` |
-| `bbVideoData` | 877 | vídeo mp4 en base64 (8 MB en una línea) ⚠ |
-| Script principal | 879–~1376 | `CONFIG`, `IMG`, `SECTIONS`, `T` (i18n + datos de la cronología), `CAL` (icono SVG), `R`, lógica de navegación y formularios |
-| Script de dominios (v07) | ~1378 | `DOMS`, `OK=` regex, `NL_ENDPOINT`, handler del newsletter |
+| `<style id="bb-theme">` | 344–~1058 | capa de marca "Bimbo" (211 KB): avatares de los bots (`.av-*`), ilustraciones de panadería (`.bk-*`), genio (`.rc-genie`) y CSS de "Databricks al día". Tiene blobs ⚠ |
+| Cabecera | ~1060–1070 | logo Business Technology y marca en base64 ⚠ |
+| Secciones (`<section class="panel" id=…>`) | 1074–~1570 | `inicio` (castillo, genio y lámpara, bots `#crewRow`), `que-es`, `databricks`, `ruta`, `registro`, `eventos`, `noticias` (incluye `bb-dbx-news` y el form `bbNl`), `comunidad` (mentores/champions), `construye` (casos de uso `#ucPills`, sandbox `#sbxBtn`, form `ideaForm`), `recursos` |
+| Modal de vídeo | ~1573 | `<dialog>` con `#vmBody` |
+| `bbVideoData` | 1578 | vídeo mp4 en base64 (8 MB en una línea) ⚠ |
+| Script principal | 1580–~2216 | `CONFIG`, `IMG` (1624 ⚠), `SECTIONS`, `T` (i18n + cronología), `CAL`, rutas (`RT_AV`, `PROD_URL`, `R`), validación y envío del registro, confirmación guiada (`AREA_BOT`, `AREA_UC…`, `L`), parámetros de URL (`QS`: `?lang=en`, `&area=`), dock de pasos |
+| Script de dominios / newsletter | ~2218 | `DOMS`, `OK=` regex, `NL_ENDPOINT`, handler del newsletter |
+| Script v13 | ~2260 | formularios "Envía tu idea" (`#ideaForm`) y "Solicita tu acceso" (`#accessForm`, dentro de `<details id="accessX">` en Registro), listas de áreas/roles/impacto, casos de uso, botón del sandbox |
+| Scripts v23–v25 | ~2358–2420 | turnos de conversación de los bots, diálogos bot ↔ Genie (`.duo`), CTA de mentores (`#chGo`, `#qMentor`, `#chMail`) |
 
-⚠ = líneas con blobs: no uses `Read` sobre ellas.
+⚠ = líneas con blobs: no uses `Read` sobre ellas. En v38 son 649–723, 926, 1053, 1060–1102, 1126, 1164–1194,
+1432, 1452, 1565, 1578, 1624 y 2127 (`html_tool.py blobs` da la lista exacta).
 
 ## Navegación
 
 Una sola página con paneles. `SECTIONS` (JS) define el menú: `{id, ic, es, en, short?}`. Mostrar un panel = `show(id)`;
-los enlaces usan `data-go="<id>"`. Para añadir una sección:
+los enlaces usan `data-go="<id>"`. Enlaces útiles: `#registro`, `?lang=en`, `&area=Finanzas` (preselecciona el área).
+Para añadir una sección:
 1. Añade `<section class="panel" id="nueva" hidden>` junto a las demás.
 2. Añade la entrada en `SECTIONS`.
 3. Añade las claves i18n.
@@ -33,19 +38,23 @@ los enlaces usan `data-go="<id>"`. Para añadir una sección:
    → `html_tool.py i18n clave --es … --en …`. Los valores con HTML van entre comillas simples
    (`t5:'Haz tu <span class="accent">…</span>'`); la herramienta respeta la comilla original.
    Además existe `data-i18n-alt` (texto alternativo de imágenes). Algunas claves de `T` son arrays, no strings
-   (`tl`, `countries`…); `i18n` no las edita, así que usa `replace` sobre el fragmento concreto en `T.es` **y** en `T.en`.
-2. **Pares `<span class="bb-es">…</span><span class="bb-en">…</span>`**, que se usan en las zonas añadidas después
-   (banner, newsletter, "Databricks al día"). El CSS oculta el idioma inactivo. Edita siempre los dos spans.
-3. **Objetos de datos con `es:{…}` / `en:{…}`** en `CONFIG` (`pastEvents`, `news`, `testimonials`) y en `SECTIONS`.
+   (`tl`, `countries`, `routes`…); `i18n` no las edita, así que usa `replace` sobre el fragmento concreto en `T.es` **y** en `T.en`.
+2. **Pares `<span class="bb-es">…</span><span class="bb-en">…</span>`**. En v38 son la forma mayoritaria (416 pares):
+   banner, bots, Construye, formularios de ideas/acceso, newsletter, "Databricks al día". El CSS oculta el idioma inactivo.
+   Edita siempre los dos spans.
+3. **Objetos de datos con `es:{…}` / `en:{…}`** en `CONFIG` (`pastEvents`, `news`, `testimonials`) y en `SECTIONS`,
+   y pares `["es","en"]` en las listas del script v13 (`AREAS`, `ROLES`, `IMPACT`).
 
 ## CONFIG (lo más editado)
 
 | Clave | Uso |
 |---|---|
-| `selfAssessmentUrl` | enlace al Self-Assessment (otra Databricks App) |
+| `selfAssessmentUrl` | enlace al Self-Assessment (otra Databricks App); el botón `#saBtn` también lo trae en el HTML |
 | `videoMain` / `videoDatabricks` | vídeos; `videoDatabricks` acepta una URL embebible (YouTube /embed/, Stream, Vimeo) o un .mp4 |
-| `registrationEndpoint` | ⚙ lo reescribe el deploy; no lo edites |
-| `communityUrl`, `contactEmail`, `contactName` | datos de la comunidad y del contacto (hoy vacíos) |
+| `registrationEndpoint` | ⚙ lo reescribe el deploy (`/api/register`); no lo edites |
+| `ideasEndpoint` / `accessEndpoint` | ⚙ los reescribe el deploy (`/api/ideas`, `/api/access-requests`); vacíos = modo demostración |
+| `sandboxUrl` | URL del Sandbox de Desarrollo; vacío = el botón abre "Solicita tu acceso" |
+| `communityUrl`, `contactEmail`, `contactName` | datos de la comunidad y del contacto (hoy vacíos; `contactEmail` activa "Contáctanos" en mentores) |
 | `links.{academy, docs, whatIs, support, pastVideos, hackathonReport}` | enlaces de Recursos |
 | `pastEvents[]` | `{icon, url, es:{t,d}, en:{t,d}}` |
 | `testimonials[]` | `{quote:{es,en}, name, role}` (vacío) |
@@ -54,18 +63,34 @@ los enlaces usan `data-go="<id>"`. Para añadir una sección:
 Las tarjetas de `CONFIG.news` son las noticias **del programa**. "Databricks al día" (`#bb-dbx-news`) es otra cosa:
 se actualiza con el Job subiendo `items.json` y no se edita en el HTML.
 
+## Formularios y lo que envían
+
+| Formulario | Endpoint | Campos del payload (los que no tienen columna van a `raw`) |
+|---|---|---|
+| `#regForm` (Registro) | `/api/register` | `name, email, country, area, kickoff, kickoffMode, wave, trainingLanguage, newsletter, mentorInterest, selfAssessmentDone, hasDatabricksAccount, accessRequest, uiLanguage, submittedAt, source` |
+| `#bbNl` (Newsletter) | `/api/newsletter` | `email, lang, source, ts` |
+| `#ideaForm` (Construye) | `/api/ideas` | `type:"idea", name, email, area, idea (10–500), problem, dataNeeded, uiLanguage, submittedAt, source` |
+| `#accessForm` (Registro → "Solicita tu acceso") | `/api/access-requests` | `type:"accessRequest", name, email, country, area, role, currentAccess[], hasDatabricksAccount, reason, expectedImpact, urgency, uiLanguage, submittedAt, source` |
+
+Los cuatro formularios validan el dominio corporativo en el navegador; el backend lo vuelve a validar (`app/models.py`)
+y guarda la identidad del usuario de Databricks en las columnas `sso_*`.
+
 ## Fechas del programa
 
 - **Cronología de Eventos + cuenta atrás**: `T.es.tl` y `T.en.tl` (arrays paralelos). Cada hito tiene la forma
   `{i: icono, d:"AAAA-MM-DD" inicio, e:"AAAA-MM-DD" fin opcional, w: texto "cuándo", t: título, p: descripción}`.
   `renderEvents()` calcula el estado (pasado, ahora, siguiente) y los días de `#countdown` a partir de `d`/`e`, así que
   basta con cambiar las fechas ISO **en los dos arrays** y el texto `w`.
-- Las fechas también aparecen en textos i18n (p. ej. `e5:"Paso 1 · Hasta el 7 de octubre"`), en `CONFIG.news[].date`
-  y en textos sueltos. Antes de cambiar una fecha, ejecuta `find "7 de octubre"`, `find "October 7"` y
-  `find "2026-10-07"`, y cámbiala en todos los sitios, en ES y en EN.
+- Las fechas también aparecen en textos i18n (p. ej. `"Hasta el 7 de octubre"`), en `CONFIG.news[].date`, en el
+  evento de calendario (`icsURL()`, archivo `BimboBricks-8-oct.ics`) y en textos sueltos. Antes de cambiar una fecha,
+  ejecuta `find "7 de octubre"`, `find "October 7"`, `find "2026-10-07"` (y lo mismo para el 8), y cámbiala en todos
+  los sitios, en ES y en EN.
 
 ## Imágenes
 
-`IMG = { map, laptop, grad, trophy }` (línea 918) contiene las ilustraciones de noticias en base64. Las demás
-imágenes están inline en `<img src="data:…">`. `html_tool.py blobs` las lista con su índice y una pista (clase/alt/clave).
+`IMG = { map, laptop, grad, trophy }` (línea 1624) contiene las ilustraciones de noticias en base64. Las demás
+imágenes están inline en `<img src="data:…">` o como `background-image:url(data:…)` en `bb-theme` (avatares de bots,
+genio, lámpara, castillo). `html_tool.py blobs` las lista con su índice y una pista (clase/alt/clave).
 Prefiere WebP de menos de 100 KB; el HTML publicado debe quedar por debajo de 9,5 MB (el límite por archivo de Apps es 10 MB).
+El paquete del dueño trae aparte el genio y las poses en PNG/WebP (`updates/…/3_genio_assets`): ya están embebidos;
+solo hacen falta si se cambia una imagen con `set-blob`.

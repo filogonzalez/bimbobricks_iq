@@ -4,7 +4,7 @@
 
 ## Antes de pegar el prompt
 
-1. En tu laptop, ejecuta `python3 scripts/prepare.py`. Genera `app/static/index.html` (ya viene en el repo para la v12) y `build/video.mp4`.
+1. En tu laptop, ejecuta `python3 scripts/prepare.py`. Genera `app/static/index.html` (ya viene en el repo para la v38) y `build/video.mp4`.
 2. Sube la carpeta del repo al workspace: **Workspace → tu carpeta → Import → carpeta/zip**. Si tienes Git conectado, también puedes usar **Create → Git folder**. Ruta sugerida: `/Workspace/Users/<tu-usuario>/bimbobricks-iq-dabs`.
 3. Ten a mano `build/video.mp4`, porque el prompt pedirá subirlo al Volume.
 
@@ -45,7 +45,7 @@ Al terminar, dame la URL de la App y un resumen de lo verificado. Luego repetimo
 
 ## Prompt para un espacio de Genie sobre los registros (opcional, después del deploy)
 
-Crea un Genie space con las tablas `bimbobricks_forms.forms.registrations` y `bimbobricks_forms.forms.newsletter_subscriptions`. Como instrucciones generales:
+Crea un Genie space con las tablas `bimbobricks_forms.forms.registrations`, `bimbobricks_forms.forms.newsletter_subscriptions`, `bimbobricks_forms.forms.ideas` y `bimbobricks_forms.forms.access_requests`. Como instrucciones generales:
 
 ```text
 Estas tablas contienen los registros del programa de formación BimboBricks IQ · Ola 2 de Grupo Bimbo.
@@ -54,5 +54,8 @@ Estas tablas contienen los registros del programa de formación BimboBricks IQ �
   created_at = primer registro; updated_at = último envío. sso_email = cuenta Databricks con la que se envió
   (sso_verified = true si se confirmó con el token del usuario); email puede ser el de otra persona registrada por ella.
 - newsletter_subscriptions: suscriptores del newsletter; unsubscribed_at nulo = suscripción activa.
+- ideas: ideas de casos de uso enviadas desde "Construye" (una fila por idea). access_requests: solicitudes de acceso a
+  Databricks (una fila por solicitud; role, urgency). En registrations, raw->>'mentorInterest' y raw->>'newsletter' traen
+  el interés en ser mentor/champion y en el newsletter.
 Responde en español. Cuenta personas por email distinto. Las fechas están en UTC; conviértelas a America/Mexico_City.
 ```

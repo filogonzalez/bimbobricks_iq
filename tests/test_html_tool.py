@@ -15,7 +15,7 @@ def html(tmp_path):
     files = list((ROOT / "html").glob("*.html"))
     if len(files) != 1:
         pytest.skip("html/ no tiene exactamente un HTML")
-    dst = tmp_path / "bimbobricks-iq_v12_cta-academy.html"
+    dst = tmp_path / "bimbobricks-iq_v38_capacitacion-2026.html"
     shutil.copy(files[0], dst)
     return dst
 
@@ -59,6 +59,6 @@ def test_set_blob_and_video(html, tmp_path):
 
 def test_bump(html):
     html_tool.main(["--file", str(html), "bump"])
-    assert (html.parent / "bimbobricks-iq_v13_cta-academy.html").exists() and not html.exists()
-    html_tool.main(["--file", str(html.parent / "bimbobricks-iq_v13_cta-academy.html"), "bump", "--label", "ola2"])
-    assert (html.parent / "bimbobricks-iq_v14_ola2.html").exists()
+    assert (html.parent / "bimbobricks-iq_v39_capacitacion-2026.html").exists() and not html.exists()
+    html_tool.main(["--file", str(html.parent / "bimbobricks-iq_v39_capacitacion-2026.html"), "bump", "--label", "ola2"])
+    assert (html.parent / "bimbobricks-iq_v40_ola2.html").exists()

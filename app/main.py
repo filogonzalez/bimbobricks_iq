@@ -4,6 +4,8 @@ GET  /                 HTML preparado por scripts/prepare.py + bloque de noticia
 GET  /media/video.mp4  vídeo desde el Volume, con soporte Range
 POST /api/register     registro  → Lakebase forms.registrations
 POST /api/newsletter   newsletter → Lakebase forms.newsletter_subscriptions
+POST /api/ideas        "Envía tu idea" → Lakebase forms.ideas
+POST /api/access-requests  "Solicita tu acceso" → Lakebase forms.access_requests
 GET  /api/me           identidad con la que se guardan los envíos (cabeceras del proxy + token OBO)
 GET  /api/health       estado (build, almacén); /healthz lo responde el proxy de Databricks Apps
 """
@@ -20,7 +22,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 
 import identity
-from models import Newsletter, Registration
+from models import AccessRequest, Idea, Newsletter, Registration
 from store import make_store, to_json
 from volume import CachedFile, VolumeReader
 
@@ -133,25 +135,37 @@ def _save(fn, row):
         return {"ok": False, "error": "storage_unavailable"}, 503
 
 
-@app.post("/api/register")
-def register(reg: Registration, request: Request):
+def _record(fn, data, request):
     who = _submitter(request)
     if who is None:
         return _unauthenticated()
     # Las columnas de identidad van al final: un campo extra del formulario no puede pisarlas.
-    row = {**reg.model_dump(), "raw": to_json(reg.model_dump(by_alias=True)), **who.columns()}
-    body, status = _save(store.upsert_registration, row)
+    body, status = _save(fn, {**data, **who.columns()})
     return JSONResponse(body, status_code=status)
+
+
+def _with_raw(model):
+    return {**model.model_dump(), "raw": to_json(model.model_dump(by_alias=True))}
+
+
+@app.post("/api/register")
+def register(reg: Registration, request: Request):
+    return _record(store.upsert_registration, _with_raw(reg), request)
 
 
 @app.post("/api/newsletter")
 def newsletter(sub: Newsletter, request: Request):
-    who = _submitter(request)
-    if who is None:
-        return _unauthenticated()
-    row = {**sub.model_dump(include={"email", "lang", "source", "ts"}), **who.columns()}
-    body, status = _save(store.upsert_newsletter, row)
-    return JSONResponse(body, status_code=status)
+    return _record(store.upsert_newsletter, sub.model_dump(include={"email", "lang", "source", "ts"}), request)
+
+
+@app.post("/api/ideas")
+def ideas(idea: Idea, request: Request):
+    return _record(store.add_idea, _with_raw(idea), request)
+
+
+@app.post("/api/access-requests")
+def access_requests(req: AccessRequest, request: Request):
+    return _record(store.add_access_request, _with_raw(req), request)
 
 
 @app.get("/api/me")

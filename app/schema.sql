@@ -41,3 +41,39 @@ CREATE TABLE IF NOT EXISTS forms.newsletter_subscriptions (
   updated_at       timestamptz NOT NULL DEFAULT now(),
   unsubscribed_at  timestamptz
 );
+
+-- Formularios "Envía tu idea" (sección Construye) y "Solicita tu acceso" (v13+): una fila por envío,
+-- porque una persona puede mandar varias. El resto de campos del formulario queda en `raw`.
+CREATE TABLE IF NOT EXISTS forms.ideas (
+  id                   bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  email                text NOT NULL
+                       CHECK (email = lower(email) AND email ~ '^[^\s@]+@(grupobimbo\.com|gbsupport\.net)$'),
+  name                 text NOT NULL CHECK (length(name) BETWEEN 2 AND 200),
+  area                 text,
+  idea                 text NOT NULL,
+  sso_email            text,
+  sso_user             text,
+  sso_username         text,
+  sso_verified         boolean NOT NULL DEFAULT false,
+  client_submitted_at  timestamptz,
+  created_at           timestamptz NOT NULL DEFAULT now(),
+  raw                  jsonb NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS forms.access_requests (
+  id                   bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  email                text NOT NULL
+                       CHECK (email = lower(email) AND email ~ '^[^\s@]+@(grupobimbo\.com|gbsupport\.net)$'),
+  name                 text NOT NULL CHECK (length(name) BETWEEN 2 AND 200),
+  country              text,
+  area                 text,
+  role                 text,
+  urgency              text,
+  sso_email            text,
+  sso_user             text,
+  sso_username         text,
+  sso_verified         boolean NOT NULL DEFAULT false,
+  client_submitted_at  timestamptz,
+  created_at           timestamptz NOT NULL DEFAULT now(),
+  raw                  jsonb NOT NULL
+);

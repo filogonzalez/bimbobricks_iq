@@ -51,6 +51,38 @@ class Registration(BaseModel):
         return v.strip() if isinstance(v, str) else v
 
 
+class _Request(BaseModel):
+    """Base de los formularios "Envía tu idea" y "Solicita tu acceso" (una fila por envío)."""
+
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+    name: str = Field(min_length=2, max_length=200)
+    email: str
+    area: Optional[str] = Field(default=None, max_length=200)
+    submitted_at: Optional[datetime] = Field(default=None, alias="submittedAt")
+    source: Optional[str] = Field(default=None, max_length=100)
+
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, v):
+        return corporate_email(v)
+
+    @field_validator("name", "area", mode="before")
+    @classmethod
+    def strip_text(cls, v):
+        return v.strip() if isinstance(v, str) else v
+
+
+class Idea(_Request):
+    idea: str = Field(min_length=10, max_length=500)
+
+
+class AccessRequest(_Request):
+    country: Optional[str] = Field(default=None, max_length=100)
+    role: Optional[str] = Field(default=None, max_length=100)
+    urgency: Optional[str] = Field(default=None, max_length=50)
+
+
 class Newsletter(BaseModel):
     model_config = ConfigDict(extra="allow")
 

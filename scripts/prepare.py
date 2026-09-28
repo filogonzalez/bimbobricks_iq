@@ -11,6 +11,7 @@ Contrato con el HTML (si algo falta, el deploy se detiene con un mensaje claro):
   - <form id="regForm"> y <form id="bbNl">
   - CONFIG.registrationEndpoint: "..."   -> se cablea a /api/register
   - var NL_ENDPOINT = "..."             -> se cablea a /api/newsletter
+  - (opcional, desde v13) CONFIG.ideasEndpoint / CONFIG.accessEndpoint -> /api/ideas y /api/access-requests
   - (opcional) <script type="application/octet-stream" id="bbVideoData"> con el mp4 en base64
   - <section id="bb-dbx-news"> o, si no existe, <form class="bb-nl" id="bbNl"> como ancla
 
@@ -33,6 +34,11 @@ OUT_VIDEO = ROOT / "build" / "video.mp4"
 
 API_REGISTER = "/api/register"
 API_NEWSLETTER = "/api/newsletter"
+# Formularios "Envía tu idea" y "Solicita tu acceso" (v13+). Si el HTML no los trae, no se cablean.
+OPTIONAL_ENDPOINTS = (
+    ("ideasEndpoint", "/api/ideas", "Ideas (CONFIG.ideasEndpoint)"),
+    ("accessEndpoint", "/api/access-requests", "Solicitudes de acceso (CONFIG.accessEndpoint)"),
+)
 VIDEO_URL = "/media/video.mp4"
 NEWS_START = "<!--BB_NEWS_START-->"
 NEWS_END = "<!--BB_NEWS_END-->"
@@ -94,6 +100,10 @@ def wire_endpoints(h):
     h = _replace_once(
         h, r'NL_ENDPOINT\s*=\s*"[^"]*"',
         lambda m: 'NL_ENDPOINT="%s"' % API_NEWSLETTER, "Newsletter (NL_ENDPOINT)")
+    for key, api, what in OPTIONAL_ENDPOINTS:
+        pattern = r'\b%s\s*:\s*"[^"]*"' % key
+        if re.search(pattern, h):
+            h = _replace_once(h, pattern, lambda m, key=key, api=api: '%s: "%s"' % (key, api), what)
     return h
 
 

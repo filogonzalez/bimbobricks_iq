@@ -38,6 +38,16 @@ def test_mini_contract(tmp_path):
     assert m["video_mb"] is not None
 
 
+def test_wires_optional_endpoints_only_when_present(tmp_path):
+    h, _ = run(tmp_path, MINI)  # v12: sin ideas ni acceso
+    assert "ideasEndpoint" not in h and "accessEndpoint" not in h
+    v13 = MINI.replace('registrationEndpoint: "",', 'registrationEndpoint: "", ideasEndpoint: "", accessEndpoint: "https://old",')
+    h, _ = run(tmp_path, v13)
+    assert 'ideasEndpoint: "/api/ideas"' in h and 'accessEndpoint: "/api/access-requests"' in h
+    with pytest.raises(prepare.ContractError, match="ideasEndpoint"):
+        run(tmp_path, v13.replace('ideasEndpoint: "",', 'ideasEndpoint: "", ideasEndpoint: "",'))
+
+
 def test_is_idempotent_on_already_wired_endpoints(tmp_path):
     h, _ = run(tmp_path, MINI.replace('registrationEndpoint: ""', 'registrationEndpoint: "https://old"'))
     assert 'registrationEndpoint: "/api/register"' in h
@@ -76,3 +86,7 @@ def test_real_html(tmp_path):
     m = prepare.build(files[0], out, tmp_path / "build.json", tmp_path / "video.mp4")
     assert m["output_mb"] < 9.5
     assert (tmp_path / "video.mp4").read_bytes()[4:8] == b"ftyp"
+    h = out.read_text(encoding="utf-8")
+    for wired in ('registrationEndpoint: "/api/register"', 'NL_ENDPOINT="/api/newsletter"',
+                  'ideasEndpoint: "/api/ideas"', 'accessEndpoint: "/api/access-requests"'):
+        assert h.count(wired) == 1, wired

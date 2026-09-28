@@ -1,12 +1,12 @@
 ---
 name: editar-html
-description: Modifica la web de BimboBricks IQ (html/*.html, ~8,6 MB con imágenes y vídeo en base64) sin romper el deploy. Úsalo para cambiar textos ES/EN, fechas, eventos, noticias de CONFIG, enlaces, FAQ, estilos, imágenes o el vídeo; para aplicar cambios pedidos por el dueño del HTML, o para sacar una nueva versión (v12 → v13) antes de `./deploy.sh`.
+description: Modifica la web de BimboBricks IQ (html/*.html, ~8,9 MB con imágenes y vídeo en base64) sin romper el deploy. Úsalo para cambiar textos ES/EN, fechas, eventos, noticias de CONFIG, enlaces, FAQ, estilos, imágenes o el vídeo; para aplicar cambios pedidos por el dueño del HTML, o para sacar una nueva versión (v38 → v39) antes de `./deploy.sh`.
 ---
 
 # Editar el HTML de BimboBricks IQ
 
 El HTML es un único archivo autocontenido con **líneas de hasta 8 MB** (el vídeo en base64 y
-unas 22 imágenes). **Nunca lo leas entero ni con `Read` sin `offset/limit`**, y no uses `cat` o `grep` sin filtrar:
+unas 46 imágenes). **Nunca lo leas entero ni con `Read` sin `offset/limit`**, y no uses `cat` o `grep` sin filtrar:
 llenarías el contexto de base64. Usa siempre `scripts/html_tool.py`, que oculta los blobs como `«blob:mime:KB»`.
 
 Todos los comandos se ejecutan desde la raíz del repo y trabajan sobre el único `.html` de `html/`.
@@ -27,13 +27,13 @@ Todos los comandos se ejecutan desde la raíz del repo y trabajan sobre el únic
    contexto hasta que sea único; no subas `--count` a ciegas. Usa `--dry-run` para probar.
    Para cambios grandes en una zona sin blobs (CSS, JS de `T`/`CONFIG`), puedes usar `Read` con
    `offset/limit` en las líneas que da `find` y después `Edit`. Comprueba antes que esas líneas no sean
-   las de blobs (en v12: 529–583, 877 y 918).
+   las de blobs (en v38 están listadas en el mapa; `blobs` da la lista exacta).
 4. **Bilingüe siempre**: cada cambio visible va en ES **y** EN (ver las tres formas en el mapa). Si el usuario
    solo te da un idioma, traduce tú y díselo.
 5. **Validar**: `python3 scripts/html_tool.py check` comprueba el contrato de deploy, la paridad de claves ES/EN,
    los pares `bb-es`/`bb-en` y el balance de etiquetas. Tiene que terminar en `✔ check OK`.
    Si tocaste formularios, noticias o endpoints, ejecuta también los tests (`pytest -q`).
-6. **Versionar** (solo si el usuario quiere una versión nueva): `bump` renombra `_v12_…` → `_v13_…`
+6. **Versionar** (solo si el usuario quiere una versión nueva): `bump` renombra `_v38_…` → `_v39_…`
    (`--label nuevo-sufijo` para cambiar el sufijo). Así `html/` sigue teniendo un único archivo.
 7. **Resumir** al usuario qué cambió (sección, ES/EN y el resultado de `check`) y recordarle que publica con
    `./deploy.sh dev -p bimbo`, y después `prod`.
@@ -44,6 +44,9 @@ Todos los comandos se ejecutan desde la raíz del repo y trabajan sobre el únic
 - `<form … id="regForm">` y `<form class="bb-nl" id="bbNl" …>`, junto con los `name`/`id` de sus inputs (el backend
   valida `name`, `email`, `kickoff`, `wave`, `trainingLanguage`…; ver `app/models.py`).
 - `registrationEndpoint: "…"` dentro de `CONFIG` y `var NL_ENDPOINT="…"`: su valor da igual, se reescribe en el deploy.
+- `ideasEndpoint: "…"` y `accessEndpoint: "…"` en `CONFIG` (desde v13): opcionales, pero si existen se reescriben a
+  `/api/ideas` y `/api/access-requests`. Deben aparecer una sola vez. Lo mismo vale para `#ideaForm`/`#accessForm` y
+  los campos de su payload (ver el mapa).
 - `videoMain: (window.__bbVideoUrl || "")` y `<script type="application/octet-stream" id="bbVideoData">`.
 - `<section id="bb-dbx-news">…</section>`: su contenido lo reemplaza el Job de noticias en producción. Editar las
   tarjetas aquí solo cambia el valor por defecto. Para las noticias reales, sube un `items.json` al Volume `news_inbox`.

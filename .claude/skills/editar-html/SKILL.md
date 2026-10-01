@@ -1,6 +1,6 @@
 ---
 name: editar-html
-description: Modifica la web de BimboBricks IQ (html/*.html, ~8,9 MB con imágenes y vídeo en base64) sin romper el deploy. Úsalo para cambiar textos ES/EN, fechas, eventos, noticias de CONFIG, enlaces, FAQ, estilos, imágenes o el vídeo; para aplicar cambios pedidos por el dueño del HTML, o para sacar una nueva versión (v38 → v39) antes de `./deploy.sh`.
+description: Modifica la web de BimboBricks IQ (html/*.html, ~9 MB con imágenes y vídeo en base64) sin romper el deploy. La web es TRILINGÜE (ES/EN/PT-BR). Úsalo para cambiar textos ES/EN/PT, fechas, eventos, noticias de CONFIG, enlaces, FAQ, estilos, imágenes o el vídeo; para aplicar cambios pedidos por el dueño del HTML, o para sacar una nueva versión (v38 → v39) antes de `./deploy.sh`.
 ---
 
 # Editar el HTML de BimboBricks IQ
@@ -19,7 +19,7 @@ Todos los comandos se ejecutan desde la raíz del repo y trabajan sobre el únic
 3. **Editar** con la herramienta más específica:
    | Cambio | Comando |
    |---|---|
-   | Texto con `data-i18n="clave"` | `i18n clave --es "…" --en "…"` (clave nueva: `--create`) |
+   | Texto con `data-i18n="clave"` | `i18n clave --es "…" --en "…" --pt "…"` (clave nueva: `--create`) |
    | Cualquier otro fragmento | `replace --old "fragmento único" --new "…"` (para textos largos o multilínea: `--old-file/--new-file`) |
    | Imagen embebida | `blobs` → `set-blob N archivo.webp` |
    | Vídeo principal | `set-video nuevo.mp4` |
@@ -28,10 +28,13 @@ Todos los comandos se ejecutan desde la raíz del repo y trabajan sobre el únic
    Para cambios grandes en una zona sin blobs (CSS, JS de `T`/`CONFIG`), puedes usar `Read` con
    `offset/limit` en las líneas que da `find` y después `Edit`. Comprueba antes que esas líneas no sean
    las de blobs (en v38 están listadas en el mapa; `blobs` da la lista exacta).
-4. **Bilingüe siempre**: cada cambio visible va en ES **y** EN (ver las tres formas en el mapa). Si el usuario
-   solo te da un idioma, traduce tú y díselo.
-5. **Validar**: `python3 scripts/html_tool.py check` comprueba el contrato de deploy, la paridad de claves ES/EN,
-   los pares `bb-es`/`bb-en` y el balance de etiquetas. Tiene que terminar en `✔ check OK`.
+4. **Trilingüe siempre**: cada cambio visible va en ES, EN **y** PT-BR (ver las tres formas en el mapa).
+   Cada par de spans es un trío `bb-es`/`bb-en`/`bb-pt`; edita los tres. El selector de idioma tiene tres
+   botones (`data-lang="es|en|pt"`). Si el usuario solo te da un idioma, traduce tú (el PT es portugués de
+   Brasil) y díselo.
+5. **Validar**: `python3 scripts/html_tool.py check` comprueba el contrato de deploy, la paridad de claves
+   ES/EN/PT, los tríos `bb-es`/`bb-en`/`bb-pt` (los tres recuentos deben coincidir) y el balance de etiquetas.
+   Tiene que terminar en `✔ check OK`.
    Si tocaste formularios, noticias o endpoints, ejecuta también los tests (`pytest -q`).
 6. **Versionar** (solo si el usuario quiere una versión nueva): `bump` renombra `_v38_…` → `_v39_…`
    (`--label nuevo-sufijo` para cambiar el sufijo). Así `html/` sigue teniendo un único archivo.

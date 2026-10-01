@@ -34,7 +34,7 @@ class Registration(BaseModel):
     kickoff: bool
     kickoff_mode: Optional[Literal["remote", "onsite"]] = Field(default=None, alias="kickoffMode")
     wave: bool
-    training_language: Literal["es", "en"] = Field(alias="trainingLanguage")
+    training_language: Literal["es", "en", "pt"] = Field(alias="trainingLanguage")
     self_assessment_done: Optional[bool] = Field(default=None, alias="selfAssessmentDone")
     ui_language: Optional[str] = Field(default=None, alias="uiLanguage", max_length=10)
     submitted_at: Optional[datetime] = Field(default=None, alias="submittedAt")

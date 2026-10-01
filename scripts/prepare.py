@@ -63,9 +63,10 @@ NEWS_CSS = """
 # Bloque vacío si el HTML no trae noticias y el Job aún no ha publicado ninguna.
 EMPTY_NEWS = (
     '<section id="bb-dbx-news" aria-labelledby="bb-dn-h">'
-    '<h3 id="bb-dn-h"><span class="bb-es">⚡ Databricks al día</span><span class="bb-en">⚡ Databricks today</span></h3>'
+    '<h3 id="bb-dn-h"><span class="bb-es">⚡ Databricks al día</span><span class="bb-en">⚡ Databricks today</span><span class="bb-pt">⚡ Databricks em dia</span></h3>'
     '<p class="bb-dn-sub"><span class="bb-es">Muy pronto: lo último de Databricks.</span>'
-    '<span class="bb-en">Coming soon: the latest from Databricks.</span></p>'
+    '<span class="bb-en">Coming soon: the latest from Databricks.</span>'
+    '<span class="bb-pt">Em breve: o mais recente da Databricks.</span></p>'
     '<div class="bb-dn-grid"></div></section>'
 )
 

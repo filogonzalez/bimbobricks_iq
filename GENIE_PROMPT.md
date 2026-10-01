@@ -50,7 +50,7 @@ Crea un Genie space con las tablas `bimbobricks_forms.forms.registrations`, `bim
 ```text
 Estas tablas contienen los registros del programa de formación BimboBricks IQ · Ola 2 de Grupo Bimbo.
 - registrations: una fila por participante (email único). kickoff = asistirá al kick-off; kickoff_mode = remote|onsite;
-  wave = se inscribe en la Ola 2; training_language = idioma del curso (es|en); submissions = veces que envió el formulario;
+  wave = se inscribe en la Ola 2; training_language = idioma del curso (es|en|pt); submissions = veces que envió el formulario;
   created_at = primer registro; updated_at = último envío. sso_email = cuenta Databricks con la que se envió
   (sso_verified = true si se confirmó con el token del usuario); email puede ser el de otra persona registrada por ella.
 - newsletter_subscriptions: suscriptores del newsletter; unsubscribed_at nulo = suscripción activa; source = 'registro'

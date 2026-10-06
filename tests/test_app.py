@@ -204,6 +204,12 @@ def test_register_rejects_bad_fields(client):
     assert client.post("/api/register", json={**REG, "name": " "}).status_code == 422
 
 
+def test_register_accepts_portuguese_training_language(client):
+    r = client.post("/api/register", json={**REG, "trainingLanguage": "pt"}, headers=SSO)
+    assert r.status_code == 200
+    assert client.main.store.registrations["ana.perez@grupobimbo.com"]["training_language"] == "pt"
+
+
 def test_newsletter(client):
     body = {"email": "Luis@gbsupport.net", "lang": "en", "source": "BimboBricks IQ newsletter", "ts": "2026-09-26T10:00:00Z"}
     assert client.post("/api/newsletter", json=body).json()["created"] is True

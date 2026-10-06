@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS forms.registrations (
   kickoff               boolean NOT NULL,
   kickoff_mode          text CHECK (kickoff_mode IN ('remote', 'onsite')),
   wave                  boolean NOT NULL,
-  training_language     text NOT NULL CHECK (training_language IN ('es', 'en')),
+  training_language     text NOT NULL CHECK (training_language IN ('es', 'en', 'pt')),
   self_assessment_done  boolean,
   ui_language           text,
   source                text,
@@ -59,6 +59,12 @@ CREATE TABLE IF NOT EXISTS forms.ideas (
   created_at           timestamptz NOT NULL DEFAULT now(),
   raw                  jsonb NOT NULL
 );
+
+-- Migración idempotente: amplía el idioma de formación a 'pt' en bases ya desplegadas con el CHECK viejo
+-- (es/en). CREATE TABLE IF NOT EXISTS no toca una tabla existente, así que recreamos el CHECK aquí.
+ALTER TABLE forms.registrations DROP CONSTRAINT IF EXISTS registrations_training_language_check;
+ALTER TABLE forms.registrations ADD CONSTRAINT registrations_training_language_check
+  CHECK (training_language IN ('es', 'en', 'pt'));
 
 CREATE TABLE IF NOT EXISTS forms.access_requests (
   id                   bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

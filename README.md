@@ -1,6 +1,6 @@
 # BimboBricks IQ · Ola 2 — Databricks Asset Bundle
 
-La web del programa de formación de Grupo Bimbo, publicada como **Databricks App**, con los formularios en **Lakebase**, el vídeo en un **Volume** y las noticias gestionadas por un **Job**.
+La web del programa de formación de Grupo Bimbo, publicada como **Databricks App**, con los formularios en **Lakebase**, el vídeo en un **Volume** y las noticias gestionadas por un **Job**. La web es **trilingüe: español, inglés y portugués (Brasil)**; el idioma de formación (`trainingLanguage`) acepta `es`, `en` o `pt`.
 
 Workspaces destino (hay que estar en la VPN FortiClient):
 - `dev`: `https://adb-1844781131568521.1.azuredatabricks.net`, catálogo `cat_coe_dv`.
@@ -89,7 +89,10 @@ Los campos del formulario pueden cambiar: la API valida los conocidos y **guarda
 
 ## Noticias ("Databricks al día")
 
-1. Prepara `items.json` con el mismo formato de siempre (ejemplo: `samples/items.example.json`).
+1. Prepara `items.json` con el formato de siempre (ejemplo: `samples/items.example.json`). La web es
+   **trilingüe (ES/EN/PT-BR)**, así que cada item lleva `date_*`, `tag_*`, `title_*` y `sum_*` en los tres
+   idiomas (`_es`, `_en`, `_pt`), más `updated_es` / `updated_en` / `updated_pt`. Si falta algún `_pt`, el Job
+   rechaza el archivo.
 2. Súbelo en **Catalog Explorer → `<catalog>.bimbobricks_iq` → Volumes → `news_inbox` → Upload**.
 3. En aproximadamente un minuto se dispara el Job `bimbobricks-iq-news-prod`: valida, genera `news_block.html` en el Volume `media` y archiva el JSON. La web lo muestra al siguiente refresco (la caché de la App dura 60 s). **No hace falta redeploy.**
 4. Si el JSON es inválido, el Job falla y te llega un correo; el archivo queda en `media/news/rejected/` junto con un `.error.txt` que explica el problema.

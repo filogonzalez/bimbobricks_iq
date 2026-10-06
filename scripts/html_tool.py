@@ -9,8 +9,8 @@ leerlo entero ni editarlo "a mano". Todos los comandos ocultan los blobs como «
   python3 scripts/html_tool.py show registro [--max 6000]   elemento con id="registro"
   python3 scripts/html_tool.py replace --old "…" --new "…" [--count N] [--dry-run]
   python3 scripts/html_tool.py replace --old-file a.txt --new-file b.txt
-  python3 scripts/html_tool.py i18n heroSub                 ver texto ES/EN de una clave data-i18n
-  python3 scripts/html_tool.py i18n heroSub --es "…" --en "…"
+  python3 scripts/html_tool.py i18n heroSub                 ver texto ES/EN/PT de una clave data-i18n
+  python3 scripts/html_tool.py i18n heroSub --es "…" --en "…" --pt "…"
   python3 scripts/html_tool.py blobs                        lista imágenes/vídeo embebidos
   python3 scripts/html_tool.py set-blob 3 nueva.webp        sustituye la imagen nº 3
   python3 scripts/html_tool.py set-video nuevo.mp4          sustituye el vídeo embebido
@@ -80,14 +80,17 @@ def js_block(h, start):
     raise ValueError("llave sin cerrar desde %d" % start)
 
 
+LANGS = ("es", "en", "pt")
+
+
 def i18n_blocks(h):
-    """Rangos (inicio, fin) de T.es y T.en dentro de `const T = {…}`."""
+    """Rangos (inicio, fin) de T.es, T.en y T.pt dentro de `const T = {…}`."""
     t = h.find("const T = {")
     if t < 0:
         raise SystemExit("No se encontró `const T = {` (diccionario i18n).")
     t_end = js_block(h, h.index("{", t))
     out = {}
-    for lang in ("es", "en"):
+    for lang in LANGS:
         m = re.compile(r"\b%s\s*:\s*\{" % lang).search(h, t, t_end)
         if not m:
             raise SystemExit("T.%s no encontrado" % lang)
@@ -137,9 +140,9 @@ def cmd_outline(a, h):
         print("\nCONFIG: " + ", ".join(keys))
     try:
         b = i18n_blocks(h)
-        print("\ni18n T.es: %d claves · T.en: %d claves · data-i18n en HTML: %d · pares bb-es/bb-en: %d/%d" % (
-            len(i18n_keys(h, b["es"])), len(i18n_keys(h, b["en"])), h.count("data-i18n"),
-            h.count('class="bb-es"'), h.count('class="bb-en"')))
+        print("\ni18n T.es: %d · T.en: %d · T.pt: %d claves · data-i18n en HTML: %d · pares bb-es/bb-en/bb-pt: %d/%d/%d" % (
+            len(i18n_keys(h, b["es"])), len(i18n_keys(h, b["en"])), len(i18n_keys(h, b["pt"])), h.count("data-i18n"),
+            h.count('class="bb-es"'), h.count('class="bb-en"'), h.count('class="bb-pt"')))
     except SystemExit as e:
         print("\ni18n: %s" % e)
     blobs = list(BLOB_RE.finditer(h))
@@ -208,13 +211,13 @@ def cmd_replace(a, h):
 
 def cmd_i18n(a, h):
     b = i18n_blocks(h)
-    if a.es is None and a.en is None:
-        for lang in ("es", "en"):
+    if a.es is None and a.en is None and a.pt is None:
+        for lang in LANGS:
             m, g = key_match(h, a.key, b[lang])
             print("%s: %s" % (lang, m.group(g) if m else "(no existe)"))
         return
     # Se aplica de atrás hacia delante para no invalidar los offsets.
-    for lang in ("en", "es"):
+    for lang in ("pt", "en", "es"):
         val = getattr(a, lang)
         if val is None:
             continue
@@ -305,20 +308,21 @@ def cmd_check(a, h):
             errors.append("Contrato de deploy: %s" % e)
     try:
         b = i18n_blocks(h)
-        es, en = i18n_keys(h, b["es"]), i18n_keys(h, b["en"])
-        if es - en:
-            errors.append("Claves solo en T.es: %s" % ", ".join(sorted(es - en)))
-        if en - es:
-            errors.append("Claves solo en T.en: %s" % ", ".join(sorted(en - es)))
+        keys = {lang: i18n_keys(h, b[lang]) for lang in LANGS}
+        allk = set().union(*keys.values())
+        for lang in LANGS:
+            miss = allk - keys[lang]
+            if miss:
+                errors.append("Claves ausentes en T.%s: %s" % (lang, ", ".join(sorted(miss))))
         used = set(re.findall(r'data-i18n(?:-[\w-]+)?="([^"]+)"', h))
-        missing = sorted(k for k in used if k not in es and "$" not in k)
+        missing = sorted(k for k in used if k not in keys["es"] and "$" not in k)
         if missing:
             warnings.append("data-i18n sin clave en T: %s" % ", ".join(missing[:20]))
     except SystemExit as e:
         errors.append(str(e))
-    n_es, n_en = h.count('class="bb-es"'), h.count('class="bb-en"')
-    if n_es != n_en:
-        errors.append("Pares bilingües descuadrados: %d bb-es vs %d bb-en" % (n_es, n_en))
+    counts = {lang: h.count('class="bb-%s"' % lang) for lang in LANGS}
+    if len(set(counts.values())) != 1:
+        errors.append("Pares trilingües descuadrados: %s" % ", ".join("%d bb-%s" % (counts[l], l) for l in LANGS))
     body = re.sub(r"<(script|style)\b[\s\S]*?</\1>", lambda m: "\n" * m.group(0).count("\n"), h)
     p = _Balance()
     p.feed(body)
@@ -381,6 +385,7 @@ def main(argv=None):
     p.add_argument("key")
     p.add_argument("--es")
     p.add_argument("--en")
+    p.add_argument("--pt")
     p.add_argument("--create", action="store_true")
     sp.add_parser("blobs")
     p = sp.add_parser("set-blob")

@@ -31,19 +31,27 @@ Para añadir una sección:
 2. Añade la entrada en `SECTIONS`.
 3. Añade las claves i18n.
 
-## Tres formas de texto bilingüe (ES/EN)
+## Tres formas de texto trilingüe (ES/EN/PT-BR)
 
-1. **`data-i18n="clave"`** en el HTML y su valor en `const T = { es:{…}, en:{…} }`. El JS reemplaza el
+La web es trilingüe. El idioma activo sale de `document.documentElement.lang` (`es`/`en`/`pt`), con
+`?lang=` y `localStorage("bbiq-lang")`. El selector `.lang` tiene tres botones `data-lang="es|en|pt"`.
+El helper global `pick(es,en,pt)` resuelve los ternarios en el JS dinámico (dock, guía, éxito del registro).
+
+1. **`data-i18n="clave"`** en el HTML y su valor en `const T = { es:{…}, en:{…}, pt:{…} }`. El JS reemplaza el
    contenido al cambiar de idioma, así que el texto dentro de la etiqueta es solo el valor por defecto.
-   → `html_tool.py i18n clave --es … --en …`. Los valores con HTML van entre comillas simples
+   → `html_tool.py i18n clave --es … --en … --pt …`. Los valores con HTML van entre comillas simples
    (`t5:'Haz tu <span class="accent">…</span>'`); la herramienta respeta la comilla original.
    Además existe `data-i18n-alt` (texto alternativo de imágenes). Algunas claves de `T` son arrays, no strings
-   (`tl`, `countries`, `routes`…); `i18n` no las edita, así que usa `replace` sobre el fragmento concreto en `T.es` **y** en `T.en`.
-2. **Pares `<span class="bb-es">…</span><span class="bb-en">…</span>`**. En v38 son la forma mayoritaria (416 pares):
-   banner, bots, Construye, formularios de ideas/acceso, newsletter, "Databricks al día". El CSS oculta el idioma inactivo.
-   Edita siempre los dos spans.
-3. **Objetos de datos con `es:{…}` / `en:{…}`** en `CONFIG` (`pastEvents`, `news`, `testimonials`) y en `SECTIONS`,
-   y pares `["es","en"]` en las listas del script v13 (`AREAS`, `ROLES`, `IMPACT`).
+   (`tl`, `countries`, `routes`…); `i18n` no las edita, así que usa `replace` sobre el fragmento concreto en
+   `T.es`, `T.en` **y** `T.pt`.
+2. **Tríos `<span class="bb-es">…</span><span class="bb-en">…</span><span class="bb-pt">…</span>`**. Es la forma
+   mayoritaria (417 tríos): banner, bots, Construye, formularios de ideas/acceso, newsletter, "Databricks al día".
+   El CSS oculta los dos idiomas inactivos (`html:not([lang="es"]) .bb-es, …{display:none}`). Edita siempre los
+   tres spans. Lo mismo aplica a los `<em class="bb-es/en/pt">` y a los `<a class="tl-go bb-es/en/pt">`.
+3. **Objetos de datos con `es:{…}` / `en:{…}` / `pt:{…}`** en `CONFIG` (`pastEvents`, `news`, `testimonials`) y en
+   `SECTIONS` (más `short:{es,en,pt}`), y tríos `["es","en","pt"]` en las listas del script v13 (`ROLES`, `IMPACT`;
+   `AREAS` muestra el mismo valor en los tres). Los enlaces externos a docs de Databricks caen al inglés en PT
+   (no hay docs en portugués).
 
 ## CONFIG (lo más editado)
 

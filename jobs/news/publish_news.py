@@ -21,7 +21,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ITEM_KEYS = ("date_es", "date_en", "tag_es", "tag_en", "title_es", "title_en", "sum_es", "sum_en", "url", "source")
+ITEM_KEYS = ("date_es", "date_en", "date_pt", "tag_es", "tag_en", "tag_pt", "title_es", "title_en", "title_pt",
+             "sum_es", "sum_en", "sum_pt", "url", "source")
 MAX_ITEMS = 12
 e = H.escape
 
@@ -33,7 +34,7 @@ class InvalidItems(ValueError):
 def validate(data):
     if not isinstance(data, dict):
         raise InvalidItems("La raíz debe ser un objeto JSON.")
-    for k in ("updated_es", "updated_en"):
+    for k in ("updated_es", "updated_en", "updated_pt"):
         if not isinstance(data.get(k), str):
             raise InvalidItems("Falta '%s' (texto)." % k)
     items = data.get("items")
@@ -54,17 +55,18 @@ def validate(data):
 
 def card(it):
     return (f'<a class="bb-dn" href="{e(it["url"])}" target="_blank" rel="noopener noreferrer">'
-            f'<span class="bb-dn-tag"><span class="bb-es">{e(it["tag_es"])} · {e(it["date_es"])}</span><span class="bb-en">{e(it["tag_en"])} · {e(it["date_en"])}</span></span>'
-            f'<strong><span class="bb-es">{e(it["title_es"])}</span><span class="bb-en">{e(it["title_en"])}</span></strong>'
-            f'<p><span class="bb-es">{e(it["sum_es"])}</span><span class="bb-en">{e(it["sum_en"])}</span></p>'
-            f'<span class="bb-dn-src"><span class="bb-es">Fuente: {e(it["source"])} · Leer →</span><span class="bb-en">Source: {e(it["source"])} · Read →</span></span></a>')
+            f'<span class="bb-dn-tag"><span class="bb-es">{e(it["tag_es"])} · {e(it["date_es"])}</span><span class="bb-en">{e(it["tag_en"])} · {e(it["date_en"])}</span><span class="bb-pt">{e(it["tag_pt"])} · {e(it["date_pt"])}</span></span>'
+            f'<strong><span class="bb-es">{e(it["title_es"])}</span><span class="bb-en">{e(it["title_en"])}</span><span class="bb-pt">{e(it["title_pt"])}</span></strong>'
+            f'<p><span class="bb-es">{e(it["sum_es"])}</span><span class="bb-en">{e(it["sum_en"])}</span><span class="bb-pt">{e(it["sum_pt"])}</span></p>'
+            f'<span class="bb-dn-src"><span class="bb-es">Fuente: {e(it["source"])} · Leer →</span><span class="bb-en">Source: {e(it["source"])} · Read →</span><span class="bb-pt">Fonte: {e(it["source"])} · Ler →</span></span></a>')
 
 
 def block(data):
     return ('<section id="bb-dbx-news" aria-labelledby="bb-dn-h">'
-            '<h3 id="bb-dn-h"><span class="bb-es">⚡ Databricks al día</span><span class="bb-en">⚡ Databricks today</span></h3>'
+            '<h3 id="bb-dn-h"><span class="bb-es">⚡ Databricks al día</span><span class="bb-en">⚡ Databricks today</span><span class="bb-pt">⚡ Databricks em dia</span></h3>'
             f'<p class="bb-dn-sub"><span class="bb-es">Lo último de Databricks que importa para tus datos. {e(data["updated_es"])}</span>'
-            f'<span class="bb-en">The latest from Databricks that matters for your data. {e(data["updated_en"])}</span></p>'
+            f'<span class="bb-en">The latest from Databricks that matters for your data. {e(data["updated_en"])}</span>'
+            f'<span class="bb-pt">O mais recente da Databricks que importa para seus dados. {e(data["updated_pt"])}</span></p>'
             '<div class="bb-dn-grid">' + ''.join(card(i) for i in data['items']) + '</div></section>')
 
 

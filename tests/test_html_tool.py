@@ -40,9 +40,9 @@ def test_i18n_double_and_single_quotes(html):
     assert "t5:'Haz tu <span class=\"accent\">test</span> de Juan\\'s'" in h
     with pytest.raises(SystemExit, match="no existe"):
         run(html, "i18n", "claveNueva", "--es", "a", "--en", "b")
-    h = run(html, "i18n", "claveNueva", "--es", "a", "--en", "b", "--create")
-    assert 'claveNueva:"a"' in h and 'claveNueva:"b"' in h
-    run(html, "check")  # paridad ES/EN intacta
+    h = run(html, "i18n", "claveNueva", "--es", "a", "--en", "b", "--pt", "c", "--create")
+    assert 'claveNueva:"a"' in h and 'claveNueva:"b"' in h and 'claveNueva:"c"' in h
+    run(html, "check")  # paridad ES/EN/PT intacta
 
 
 def test_set_blob_and_video(html, tmp_path):

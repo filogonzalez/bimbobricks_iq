@@ -17,6 +17,7 @@ def test_publish_from_inbox(tmp_path):
     block = (media / "news" / "news_block.html").read_text(encoding="utf-8")
     assert block.startswith('<section id="bb-dbx-news"') and block.endswith("</section>")
     assert block.count('class="bb-dn"') == len(data["items"])
+    assert 'class="bb-pt"' in block  # bloque trilingüe (es/en/pt)
     assert not list(inbox.iterdir())
     assert len(list((media / "news" / "archive").iterdir())) == 1
 

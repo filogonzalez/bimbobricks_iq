@@ -68,7 +68,7 @@ def test_inserts_news_when_missing(tmp_path):
     h, _ = run(tmp_path, MINI.replace('<section id="bb-dbx-news"><h3>viejo</h3></section>', ""))
     i = h.index(prepare.NEWS_START)
     assert i < h.index('<form class="bb-nl" id="bbNl"')
-    assert "Muy pronto" in h
+    assert "Muy pronto" in h and "Em breve" in h  # fallback trilingüe (es/en/pt)
 
 
 def test_find_source_requires_single_html(tmp_path):
